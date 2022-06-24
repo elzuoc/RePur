@@ -35,23 +35,23 @@
     <div
       class="h5 leading-tight ml-2 mt-3 whitespace-normal text-zinc-400 hover:text-zinc-600 cursor-pointer"
     >
-      <router-link to="/BuyList">慣購清單</router-link>
+      <router-link to="/BuyList" @click="closeSideMenu()">慣購清單</router-link>
     </div>
     <div
       class="h5 leading-tight ml-2 mt-3 whitespace-normal text-zinc-400 hover:text-zinc-600 cursor-pointer"
     >
-      <router-link to="/">新增商品</router-link>
+      <router-link to="/" @click="closeSideMenu()">新增商品</router-link>
     </div>
     <div
       class="h5 leading-tight ml-2 mt-3 whitespace-normal text-zinc-400 hover:text-zinc-600 cursor-pointer"
     >
-      <router-link to="/SalesChannel">購物管道設定</router-link>
+      <router-link to="/SalesChannel" @click="closeSideMenu()">購物管道設定</router-link>
     </div>
 
     <div
       class="h5 leading-tight ml-2 mt-3 whitespace-normal text-zinc-400 hover:text-zinc-600 cursor-pointer"
     >
-      <router-link to="/">匯出資料</router-link>
+      <router-link to="/" @click="closeSideMenu()">匯出資料</router-link>
     </div>
   </div>
 </template>

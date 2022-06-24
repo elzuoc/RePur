@@ -2,11 +2,12 @@
   <nav ref="navbar" class="fixed top-0 z-10 w-full bg-zinc-100 shadow-sm">
     <div class="max-w-full mx-auto px-2 sm:px-8 lg:px-8">
       <div class="relative flex items-center justify-between h-12">
-        <img
-          class="block md:hidden h-6 w-auto ml-2.5 text-black"
-          src="@/assets/img/logo_01.png"
-          alt="Workflow"
-        />
+        <router-link to="/">
+          <img
+            class="block md:hidden h-6 w-auto ml-2.5 text-black"
+            src="@/assets/img/logo_01.png"
+            alt="Workflow"
+        /></router-link>
 
         <div class="inline-flex h-6">
           <div>Page Title</div>

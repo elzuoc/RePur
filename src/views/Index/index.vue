@@ -94,7 +94,7 @@
   ></div>
   <div
     ref="modal"
-    class="fixed m-auto left-0 right-0 top-0 bottom-0 z-20 w-11/12 md:w-5/12 lg:w-3/12 h-fit bg-white rounded border border-zinc-200 hidden transition-all duration-300 ease-in"
+    class="fixed m-auto left-0 right-0 top-0 bottom-0 z-20 w-11/12 md:w-8/12 lg:w-5/12 h-fit bg-white rounded border border-zinc-200 hidden transition-all duration-300 ease-in"
     :class="{ 'opacity-0': isModalClose, 'opacity-100': isModalOpen }"
   >
     <div class="w-full border-b p-2 font-bold text-left">新增慣購商品</div>
@@ -286,12 +286,12 @@ export default {
     const fileInput = ref();
     const fileInfo = ref('');
 
-    onMounted(() => {
+    const getProductList = () => {
       axios
         .get('/api/GET/products')
         .then((response) => {
-          // console.log('response', response);
-          products.value = response.data.products.map((item) => {
+          console.log('GET response', response);
+          products.value = response.data.map((item) => {
             const temp = item;
             if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
             else if (item.sales_channel === '2')
@@ -303,6 +303,9 @@ export default {
         .catch((error) => {
           console.error(error);
         });
+    };
+    onMounted(() => {
+      getProductList();
     });
 
     // Modal
@@ -338,7 +341,30 @@ export default {
       fileInfo.value.value = sizeStr + fileInput.value.files[0].name;
     };
 
-    const saveProduct = () => {};
+    const saveProduct = () => {
+      const params = {
+        belongid: 1,
+        pic: 'pickle.jpg',
+        name: '韓式泡菜',
+        brand: '慶尚北道',
+        price: '176',
+        weight: '600',
+        unit: 'g',
+        sales_channel: '1',
+        discount: '1',
+        buy_date: '2022-06-26',
+      };
+      axios
+        .post('/api/POST/product', params)
+        .then(() => {
+          getProductList();
+          closeModal();
+        })
+        .then(() => {})
+        .catch((error) => {
+          console.error(error);
+        });
+    };
 
     return {
       products,

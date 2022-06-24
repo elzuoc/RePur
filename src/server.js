@@ -1,15 +1,13 @@
 import { createServer, Model } from 'miragejs';
 
 export default function makeServer({ environment = 'development' } = {}) {
-  const server = createServer({
+  let server = createServer();
+
+  server = createServer({
     environment,
-
-    models: {
-      product: Model,
-    },
-
-    routes() {
-      this.get('/api/GET/products', () => ({
+    seeds(server) {
+      server.db; // {} the db is empty
+      server.db.loadData({
         products: [
           {
             id: 1,
@@ -51,15 +49,23 @@ export default function makeServer({ environment = 'development' } = {}) {
             buy_date: '2022-06-24',
           },
         ],
-      }));
+      });
+    },
+
+    routes() {
+      this.get('/api/GET/products', (schema) => {
+        return schema.db.products;
+      });
 
       let newId = 4;
       this.post('/api/POST/product', (schema, request) => {
+        console.log('request', request);
+        console.log('schema', schema);
         const attrs = JSON.parse(request.requestBody);
         newId += 1;
         attrs.id = newId;
-        console.log(attrs);
-        return { reminder: attrs };
+
+        return schema.db.products.insert(attrs);
       });
     },
   });
