@@ -8,21 +8,6 @@ export default function makeServer({ environment = 'development' } = {}) {
       product: Model,
     },
 
-    seeds(server) {
-      // 商品
-      // server.create('product', {
-      //   id: '1',
-      //   subid: '1',
-      //   name: '韓式泡菜',
-      //   brand: '慶尚北道',
-      //   price: '200',
-      //   weight: '600',
-      //   unit: 'g',
-      //   sales_channel: '1',
-      //   buy_date: '2022-06-22',
-      // });
-    },
-
     routes() {
       this.get('/api/GET/products', () => ({
         products: [

@@ -257,6 +257,7 @@
       </button>
       <button
         class="rounded py-1 px-2 mb-2 text-white bg-sky-500 hover:bg-sky-600 w-fit inline-block ml-2 float-right"
+        @click="saveProduct()"
       >
         OK
       </button>
@@ -266,6 +267,7 @@
 
 <script>
 import { ref, onMounted } from 'vue';
+import axios from 'axios';
 
 export default {
   name: 'IndexCompo',
@@ -285,10 +287,11 @@ export default {
     const fileInfo = ref('');
 
     onMounted(() => {
-      fetch('/api/GET/products')
-        .then((res) => res.json())
-        .then((json) => {
-          products.value = json.products.map((item) => {
+      axios
+        .get('/api/GET/products')
+        .then((response) => {
+          // console.log('response', response);
+          products.value = response.data.products.map((item) => {
             const temp = item;
             if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
             else if (item.sales_channel === '2')
@@ -296,8 +299,9 @@ export default {
 
             return temp;
           });
-
-          console.log(products.value);
+        })
+        .catch((error) => {
+          console.error(error);
         });
     });
 
@@ -334,6 +338,8 @@ export default {
       fileInfo.value.value = sizeStr + fileInput.value.files[0].name;
     };
 
+    const saveProduct = () => {};
+
     return {
       products,
       modal,
@@ -346,6 +352,7 @@ export default {
       fileInfo,
       openFile,
       getFileInfo,
+      saveProduct,
     };
   },
 };
