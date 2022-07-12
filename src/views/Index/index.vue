@@ -1,8 +1,6 @@
 <template>
   <div class="container mx-auto px-4">
-    <div
-      class="w-full border border-solid border-slate-300 text-slate-300 rounded bg-white"
-    >
+    <div class="w-full border border-solid border-slate-300 text-slate-300 rounded bg-white">
       <input
         type="text"
         class="w-[calc(100%-24px)] inline-block focus:outline-none focus:border focus-visible:border-solid focus:border-slate-400 rounded p-1"
@@ -44,11 +42,7 @@
 
     <div class="w-full mt-4 grid grid-cols-2 gap-2">
       <!-- one product start -->
-      <div
-        v-for="item in products"
-        :key="item"
-        class="flex grid grid-cols-3 gap-1 border"
-      >
+      <div v-for="item in products" :key="item" class="flex grid grid-cols-3 gap-1 border">
         <div class="flex">
           <div
             class="aspect-square bg-zinc-200 w-full"
@@ -88,10 +82,7 @@
     </div>
   </div>
 
-  <div
-    ref="modalMask"
-    class="fixed top-0 left-0 z-10 w-screen h-screen bg-black/[.5] hidden"
-  ></div>
+  <div ref="modalMask" class="fixed top-0 left-0 z-10 w-screen h-screen bg-black/[.5] hidden"></div>
   <div
     ref="modal"
     class="fixed m-auto left-0 right-0 top-0 bottom-0 z-20 w-11/12 md:w-8/12 lg:w-5/12 h-fit bg-white rounded border border-zinc-200 hidden transition-all duration-300 ease-in"
@@ -109,12 +100,7 @@
                 class="relative w-full h-full border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
                 @click="openFile()"
               >
-                <input
-                  ref="fileInput"
-                  type="file"
-                  class="hidden"
-                  @change="getFileInfo()"
-                />
+                <input ref="fileInput" type="file" class="hidden" @change="getFileInfo()" />
                 <input
                   ref="fileInfo"
                   type="text"
@@ -294,8 +280,7 @@ export default {
           products.value = response.data.map((item) => {
             const temp = item;
             if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
-            else if (item.sales_channel === '2')
-              temp.sales_channel_text = '家樂福';
+            else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
 
             return temp;
           });

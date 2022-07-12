@@ -51,7 +51,7 @@
     <div
       class="h5 leading-tight ml-2 mt-3 whitespace-normal text-zinc-400 hover:text-zinc-600 cursor-pointer"
     >
-      <router-link to="/" @click="closeSideMenu()">匯出資料</router-link>
+      <router-link to="/Export" @click="closeSideMenu()">匯出資料</router-link>
     </div>
   </div>
 </template>

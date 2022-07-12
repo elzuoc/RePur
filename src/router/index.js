@@ -3,6 +3,7 @@ import IndexCompo from '@/views/Index/index.vue';
 import BuyList from '@/views/BuyList/index.vue';
 import ProdDetail from '@/views/ProdDetail/index.vue';
 import SalesChannel from '@/views/SalesChannel/index.vue';
+import ExportCompo from '@/views/Export/index.vue';
 
 export default createRouter({
   history: createWebHistory(),
@@ -23,6 +24,10 @@ export default createRouter({
     {
       path: '/SalesChannel',
       component: SalesChannel,
+    },
+    {
+      path: '/Export',
+      component: ExportCompo,
     },
   ],
 });
