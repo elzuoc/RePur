@@ -5,7 +5,7 @@
     >
       <div
         class="relative w-full h-20 border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
-        @click="openNewItemModal()"
+        @click="getProductList()"
       >
         <div class="absolute m-auto inset-0 w-fit h-fit">
           <span class="text-white font-bold tracking-wider">+ 匯出商品紀錄</span>
@@ -28,7 +28,7 @@
       </div>
       <div ref="allReadyStatus" class="w-full text-zinc-800 rounded bg-white p-2 text-left">
         匯出程序已完成 ...
-        <span class="text-green-800" @click="exportExcel()">開啟檔案</span>
+        <span class="text-green-800" @click="getProductList()">開啟檔案</span>
       </div>
     </div>
   </div>
@@ -36,6 +36,7 @@
 </template>
 
 <script>
+import axios from 'axios';
 import { ref } from 'vue';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
@@ -65,7 +66,7 @@ export default {
       return img;
     };
 
-    const exportExcel = async () => {
+    const exportExcel = async (dataList) => {
       const workbook = new ExcelJS.Workbook();
       workbook.addWorksheet('Product', {
         views: [
@@ -96,12 +97,12 @@ export default {
           horizontal: 'center',
         };
       });
-
-      const dataList = [
-        { id: 1, name: 'John Doe', img: 'lemon.jpg' },
-        { id: 2, name: 'Jane Doe', img: 'pickle.jpg' },
-      ];
-
+      // const dataList = dataList;
+      // const dataList = [
+      //   { id: 1, name: 'John Doe', img: 'lemon.jpg' },
+      //   { id: 2, name: 'Jane Doe', img: 'pickle.jpg' }
+      // ];
+      console.log('dataList', dataList);
       for (let i = 0; i < dataList.length; i += 1) {
         worksheet.addRow({ id: dataList[i].id, name: dataList[i].name });
 
@@ -117,9 +118,8 @@ export default {
 
         const getCanvas = photoCanvas.value;
         const ctx = getCanvas.getContext('2d');
-        // const imgSrc = `/src/assets/uploads/${dataList[i].img}`;
-        const imgSrc = `https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/${dataList[i].img}`;
-        // raw.githubusercontent.com/elzuoc/RePur/main/src/assets/img/logo_01.png
+        const imgSrc = `/src/assets/uploads/${dataList[i].img}`;
+        console.log('imgSrc', imgSrc);
         getImage(imgSrc)
           .then((img) => {
             console.log('img', img);
@@ -129,10 +129,13 @@ export default {
             return dataBase64URL;
           })
           .then((base64url) => {
+            console.log('base64url', base64url);
             const imageId = workbook.addImage({
               base64: base64url,
-              extension: 'png',
+              extension: 'jpg',
             });
+
+            console.log('imageId', imageId);
             // worksheet.addImage(imageId, `C${i + 2}:C${i + 2}`);
             worksheet.addImage(imageId, {
               tl: { col: 2, row: i + 1 },
@@ -142,7 +145,8 @@ export default {
                 tooltip: 'https://www.google.com.tw/',
               },
             });
-
+          })
+          .then(() => {
             if (i === dataList.length - 1) {
               const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
               const downloadDate = new Date().toISOString().substring(0, 10).replaceAll('-', '');
@@ -156,8 +160,35 @@ export default {
       }
     };
 
+    const getProductList = () => {
+      axios
+        .get('/api/GET/products')
+        .then((response) => {
+          console.log('GET response', response);
+
+          const dataList = [];
+          // products.value = response.data.map((item) => {
+          response.data.map((item) => {
+            const temp = item;
+            if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
+            else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
+            console.log(temp);
+            const obj = { id: temp.id, name: temp.name, img: temp.pic };
+            dataList.push(obj);
+            return temp;
+          });
+
+          return dataList;
+        })
+        .then((dataList) => exportExcel(dataList))
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+
     return {
       photoCanvas,
+      getProductList,
       exportExcel,
     };
   },
