@@ -119,7 +119,7 @@ export default {
         const getCanvas = photoCanvas.value;
         const ctx = getCanvas.getContext('2d');
         // const imgSrc = `/src/assets/uploads/${dataList[i].img}`;
-        const imgSrc = `https://api.github.com/repos/elzuoc/RePur/contents/src/assets/img/${dataList[i].img}`;
+        const imgSrc = `https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/${dataList[i].img}`;
         console.log('imgSrc', imgSrc);
         getImage(imgSrc)
           .then((img) => {
