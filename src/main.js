@@ -15,9 +15,9 @@ axios.default.timeout = 16000; // 等待時間: ms
 
 // miragejs server setting
 Vue.config.productionTip = false;
-if (process.env.NODE_ENV === 'development') {
-  makeServer();
-}
+// if (process.env.NODE_ENV === 'development') {
+makeServer();
+// }
 
 Vue.component('NavBar', NavBar);
 Vue.component('IndexCompo', IndexCompo);
