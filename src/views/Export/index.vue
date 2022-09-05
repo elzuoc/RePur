@@ -117,7 +117,9 @@ export default {
 
         const getCanvas = photoCanvas.value;
         const ctx = getCanvas.getContext('2d');
-        const imgSrc = `/src/assets/uploads/${dataList[i].img}`;
+        // const imgSrc = `/src/assets/uploads/${dataList[i].img}`;
+        const imgSrc = `https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/${dataList[i].img}`;
+        // raw.githubusercontent.com/elzuoc/RePur/main/src/assets/img/logo_01.png
         getImage(imgSrc)
           .then((img) => {
             console.log('img', img);
