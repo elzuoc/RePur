@@ -58,6 +58,7 @@ export default {
         img.onload = () => resolve(img);
         img.onerror = () => reject(new Error('加載失敗'));
         img.src = src;
+        img.crossOrigin = 'anonymous';
       });
     };
 
