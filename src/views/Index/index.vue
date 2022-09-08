@@ -100,7 +100,13 @@
                 class="relative w-full h-full border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
                 @click="openFile()"
               >
-                <input ref="fileInput" type="file" class="hidden" @change="getFileInfo()" />
+                <input
+                  ref="fileInput"
+                  type="file"
+                  class="hidden"
+                  accept="image/*"
+                  @change="getFileInfo()"
+                />
                 <input
                   ref="fileInfo"
                   type="text"
@@ -108,6 +114,8 @@
                   placeholder="未選取圖片"
                   @click="openFile()"
                 />
+                <input ref="fileName" v-model="input.img" type="text" class="hidden" />
+
                 <div class="absolute m-auto inset-0 w-fit h-fit">
                   <span class="text-white font-bold text-5xl">+</span>
                 </div>
@@ -119,6 +127,7 @@
           <div class="grid grid-rows-3 gap-2">
             <div class="flex">
               <input
+                v-model="input.name"
                 type="text"
                 class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
                 placeholder="品名"
@@ -126,6 +135,7 @@
             </div>
             <div class="flex">
               <input
+                v-model="input.brand"
                 type="text"
                 class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
                 placeholder="品牌"
@@ -133,43 +143,45 @@
             </div>
             <div class="flex">
               <input
+                v-model="input.capacity"
                 type="text"
                 class="h-10 w-1/2 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
                 placeholder="容量/重量"
               />
               <select
+                v-model="input.unit"
                 class="h-10 w-1/2 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
               >
-                <option selected disabled>單位</option>
-                <option>其他單位</option>
-                <option value="g/克">g/克</option>
-                <option>kg/公斤</option>
-                <option>ml/毫升</option>
-                <option>L/公升</option>
-                <option>cm/公分</option>
-                <option>m/公尺</option>
-                <option>inch/英吋</option>
-                <option>EU/歐碼</option>
-                <option>UK/英國碼</option>
-                <option>US/美國碼</option>
-                <option>S</option>
-                <option>M</option>
-                <option>L</option>
-                <option>XL</option>
-                <option>2XL</option>
-                <option>3XL</option>
-                <option>4XL</option>
-                <option>A0</option>
-                <option>A1</option>
-                <option>A2</option>
-                <option>A3</option>
-                <option>A4</option>
-                <option>A5</option>
-                <option>B1</option>
-                <option>B2</option>
-                <option>B3</option>
-                <option>B4</option>
-                <option>B5</option>
+                <option value="" selected disabled>單位</option>
+                <option value="單位">其他單位</option>
+                <option value="g">g/克</option>
+                <option value="kg">kg/公斤</option>
+                <option value="ml">ml/毫升</option>
+                <option value="L">L/公升</option>
+                <option value="cm">cm/公分</option>
+                <option value="m">m/公尺</option>
+                <option value="inch">inch/英吋</option>
+                <option value="EU">EU/歐碼</option>
+                <option value="UK">UK/英國碼</option>
+                <option value="US">US/美國碼</option>
+                <option value="S">S</option>
+                <option value="M">M</option>
+                <option value="L">L</option>
+                <option value="XL">XL</option>
+                <option value="2XL">2XL</option>
+                <option value="3XL">3XL</option>
+                <option value="4XL">4XL</option>
+                <option value="A0">A0</option>
+                <option value="A1">A1</option>
+                <option value="A2">A2</option>
+                <option value="A3">A3</option>
+                <option value="A4">A4</option>
+                <option value="A5">A5</option>
+                <option value="B1">B1</option>
+                <option value="B2">B2</option>
+                <option value="B3">B3</option>
+                <option value="B4">B4</option>
+                <option value="B5">B5</option>
               </select>
             </div>
           </div>
@@ -179,30 +191,33 @@
         <div class="grid grid-rows-2 gap-2 w-full">
           <div class="flex">
             <select
+              v-model="input.store"
               class="h-10 w-2/4 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
             >
-              <option selected disabled>購買處</option>
-              <option>全聯</option>
-              <option>家樂福</option>
+              <option value="" selected disabled>購買處</option>
+              <option value="1">全聯</option>
+              <option value="2">家樂福</option>
             </select>
             <input
+              v-model="input.price"
               type="text"
               class="h-10 w-1/4 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
               placeholder="單件金額"
             />
             <select
+              v-model="input.discount"
               class="h-10 w-1/4 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
             >
               <option selected disabled>優惠？</option>
-              <option>日常價</option>
-              <option>活動優惠價</option>
+              <option value="0">日常價</option>
+              <option value="1">活動優惠價</option>
             </select>
           </div>
           <div class="flex">
             <input
+              v-model="input.date"
               type="date"
               class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
-              value="2022-06-22"
             />
           </div>
         </div>
@@ -271,6 +286,17 @@ export default {
     const isModalClose = ref(true);
     const fileInput = ref();
     const fileInfo = ref('');
+    const input = {
+      img: null,
+      name: null,
+      brand: null,
+      capacity: null,
+      unit: '',
+      store: '',
+      price: null,
+      discount: null,
+      date: '2022-06-22',
+    };
 
     const getProductList = () => {
       axios
@@ -315,30 +341,32 @@ export default {
     };
     const getFileInfo = () => {
       const { size } = fileInput.value.files[0]; // byte
-      let sizeStr = '';
+      let sizeStr = null;
       if (size <= 1024) sizeStr = `${size}Byte | `;
       else if (size > 1024 && size <= 1048576) {
         sizeStr = `${(size / 1024).toFixed(1)}KB | `;
       } else if (size > 1048576 && size <= 1073741824) {
         sizeStr = `${(size / 1024 / 1024).toFixed(1)}MB | `;
-      } else sizeStr = '檔案過大 | ';
+      } else if (size > 1073741824) sizeStr = '檔案過大 | ';
 
       fileInfo.value.value = sizeStr + fileInput.value.files[0].name;
+      input.img = fileInput.value.files[0].name;
     };
 
     const saveProduct = () => {
       const params = {
-        belongid: 1,
-        pic: 'pickle.jpg',
-        name: '韓式泡菜',
-        brand: '慶尚北道',
-        price: '176',
-        weight: '600',
-        unit: 'g',
-        sales_channel: '1',
-        discount: '1',
-        buy_date: '2022-06-26',
+        belongid: 0,
+        pic: input.img,
+        name: input.name,
+        brand: input.brand,
+        price: input.price,
+        weight: input.capacity,
+        unit: input.unit,
+        sales_channel: input.store,
+        discount: input.discount,
+        buy_date: input.date,
       };
+
       axios
         .post('/api/POST/product', params)
         .then(() => {
@@ -364,6 +392,8 @@ export default {
       openFile,
       getFileInfo,
       saveProduct,
+
+      input,
     };
   },
 };
