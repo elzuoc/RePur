@@ -11,7 +11,7 @@ export default function makeServer({ environment = 'development' } = {}) {
         products: [
           {
             id: 1,
-            belongid: 1,
+            belongid: 0,
             pic: 'pickle.jpg',
             name: '韓式泡菜',
             brand: '慶尚北道',
@@ -24,7 +24,7 @@ export default function makeServer({ environment = 'development' } = {}) {
           },
           {
             id: 2,
-            belongid: 2,
+            belongid: 0,
             pic: 'lemon.jpg',
             name: '農榨金桔檸檬飲',
             brand: '味全',
@@ -54,7 +54,8 @@ export default function makeServer({ environment = 'development' } = {}) {
 
     routes() {
       this.get('/api/GET/products', (schema) => {
-        return schema.db.products;
+        const mainProds = schema.db.products.filter((item) => !item.belongid);
+        return mainProds;
       });
 
       let newId = 4;
