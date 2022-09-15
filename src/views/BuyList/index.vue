@@ -25,8 +25,11 @@
         ref="searchSuggest"
         class="absolute top-9 w-full text-left bg-white p-1 z-20 border border-slate-50 bg-white p-1 text-left shadow-md hidden"
       >
-        <!-- <div v-for="item in searchOptions" :key="item">{{ item.name }}</div> -->
-        <!-- <div v-for="item in searchOptions" :key="item">{{ item.name }}</div> -->
+        <div v-for="item in searchOptions" :key="item" class="cursor-pointer">
+          <!-- eslint-disable vue/no-v-html -->
+          <div @click="changeSearch(item)" v-html="item.name"></div>
+          <!-- eslint-enable -->
+        </div>
       </div>
     </div>
 
@@ -364,6 +367,7 @@ export default {
     const search = ref(null);
     const searchSuggest = ref(null);
     const searchOptions = ref(null);
+    // const domParser = ref(new DOMParser());
 
     // sort options
     const openSortOption = () => {
@@ -459,41 +463,40 @@ export default {
 
     // search
     const initSearchInput = () => {
-      if (search.value.textContent.trim() === '') search.value.textContent = 'Search...';
+      if (search.value.textContent.trim() === '') {
+        search.value.textContent = 'Search...';
+        search.value.classList.remove('text-slate-800');
+      }
     };
     const clearSearchInput = () => {
       if (search.value.textContent.trim() === 'Search...') search.value.textContent = '';
     };
     const filterSearchOptions = (e) => {
-      // console.log(e.isComposing);
-      // if (e.isComposing) return;
-      searchOptions.value = Array.from(products.value);
-      // console.log('searchOptions.value', searchOptions.value);
-      // console.log(e.target.innerHTML);
-      // searchOptions.value.forEach((item) => {
-      //   console.log(item.name);
-      //   console.log(item.name.includes(e.target.innerHTML));
-      // });
+      searchOptions.value = Array.from(products.value).filter((item) =>
+        item.name.includes(e.target.innerHTML)
+      );
 
       const regex = new RegExp(e.target.innerHTML, 'gi');
-      let html = '';
-
       searchOptions.value = searchOptions.value
         .filter((item) => item.name.includes(e.target.innerHTML))
         .map((item) => {
-          const highlight = item.name.replace(
+          const temp = JSON.parse(JSON.stringify(item));
+          temp.name = temp.name.replace(
             regex,
             `<span class="bg-amber-100">${e.target.innerHTML}</span>`
           );
 
-          html = `<div>${highlight}</div>`;
-
-          return html;
+          return temp;
         });
 
-      searchSuggest.value.innerHTML = html;
       searchSuggest.value.classList.remove('hidden');
       if (search.value.textContent.trim() === '') searchSuggest.value.classList.add('hidden');
+    };
+
+    const changeSearch = (item) => {
+      search.value.textContent = item.name.replace(/(<([^>]+)>)/gi, '');
+      search.value.classList.add('text-slate-800');
+      searchSuggest.value.classList.add('hidden');
     };
 
     // life-cycle
@@ -531,6 +534,7 @@ export default {
       searchOptions,
       searchSuggest,
       filterSearchOptions,
+      changeSearch,
     };
   },
 };
