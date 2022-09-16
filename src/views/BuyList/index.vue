@@ -18,7 +18,11 @@
         >
           Search...
         </div>
-        <a href="#"><img src="@/assets/icons/search.svg" class="w-6 inline-block" /></a>
+        <img
+          src="@/assets/icons/search.svg"
+          class="w-6 inline-block cursor-pointer"
+          @click="goSearch"
+        />
       </div>
 
       <div
@@ -499,6 +503,29 @@ export default {
       searchSuggest.value.classList.add('hidden');
     };
 
+    const goSearch = () => {
+      const params = {
+        prodName:
+          search.value.textContent.trim() === 'Search...' ? null : search.value.textContent.trim(),
+      };
+
+      axios
+        .get(`/api/GET/products?search=${params.prodName}`)
+        .then((response) => {
+          // console.log('goSearch GET response', response);
+          products.value = response.data.map((item) => {
+            const temp = item;
+            if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
+            else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
+
+            return temp;
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
+    };
+
     // life-cycle
     onMounted(() => {
       getProductList();
@@ -535,6 +562,7 @@ export default {
       searchSuggest,
       filterSearchOptions,
       changeSearch,
+      goSearch,
     };
   },
 };

@@ -53,15 +53,24 @@ export default function makeServer({ environment = 'development' } = {}) {
     },
 
     routes() {
-      this.get('/api/GET/products', (schema) => {
-        const mainProds = schema.db.products.filter((item) => !item.belongid);
+      // all product
+      this.get('/api/GET/products', (schema, request) => {
+        let mainProds = schema.db.products.filter((item) => !item.belongid);
+
+        if (
+          Object.prototype.hasOwnProperty.call(request.queryParams, 'search') &&
+          request.queryParams.search !== 'null'
+        )
+          mainProds = mainProds.filter((item) => item.name.includes(request.queryParams.search));
+
         return mainProds;
       });
 
+      // new one product
       let newId = 4;
       this.post('/api/POST/product', (schema, request) => {
-        console.log('request', request);
-        console.log('schema', schema);
+        // console.log('request', request);
+        // console.log('schema', schema);
         const attrs = JSON.parse(request.requestBody);
         newId += 1;
         attrs.id = newId;
