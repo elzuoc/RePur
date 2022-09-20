@@ -26,6 +26,7 @@
       </div>
 
       <div
+        id="searchSuggest"
         ref="searchSuggest"
         class="absolute top-9 w-full text-left bg-white p-1 z-20 border border-slate-50 bg-white p-1 text-left shadow-md hidden"
       >
@@ -44,7 +45,7 @@
         class="relative w-full h-20 border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
         @click="openNewItemModal()"
       >
-        <div class="absolute m-auto inset-0 w-fit h-fit z-10">
+        <div class="absolute m-auto inset-0 w-fit h-fit">
           <span class="text-white font-bold tracking-wider">+ 慣購商品</span>
         </div>
       </div>
@@ -64,21 +65,31 @@
         class="absolute w-fit h-fit z-20 bg-white/[.95] shadow-md shadow-zinc-300"
         :class="{ block: isSortOpen, hidden: !isSortOpen }"
       >
-        <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
+        <div
+          class="p-2 hover:bg-zinc-50 cursor-pointer"
+          @click="sortProductList({ event: $event, field: 'buy_date', type: 'desc' })"
+        >
           <img src="@/assets/icons/sort-desc.svg" class="w-5 inline-block" />
           日期 新→舊
+          <div class="hidden">buy_date-desc</div>
         </div>
-        <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
+        <div
+          class="p-2 hover:bg-zinc-50 cursor-pointer"
+          @click="sortProductList({ event: $event, field: 'buy_date', type: 'asc' })"
+        >
           <img src="@/assets/icons/sort-asc.svg" class="w-5 inline-block" />
           日期 舊→新
+          <div class="hidden">buy_date-asc</div>
         </div>
         <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
           <img src="@/assets/icons/sort-desc.svg" class="w-5 inline-block" />
           頻率 多→少
+          <div class="hidden">times-desc</div>
         </div>
         <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
           <img src="@/assets/icons/sort-asc.svg" class="w-5 inline-block" />
           頻率 少→多
+          <div class="hidden">times-asc</div>
         </div>
         <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
           <img src="@/assets/icons/view-list.svg" class="w-5 inline-block" />
@@ -189,8 +200,9 @@
         </div>
         <div class="flex col-span-2">
           <div class="grid grid-rows-3 gap-2">
-            <div class="flex">
+            <!-- <div class="flex">
               <input
+                ref="name"
                 v-model="input.name"
                 type="text"
                 class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
@@ -199,10 +211,31 @@
             </div>
             <div class="flex">
               <input
+                ref="brand"
                 v-model="input.brand"
                 type="text"
                 class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
                 placeholder="品牌"
+              />
+            </div> -->
+            <div class="flex">
+              <input
+                :ref="form['name']"
+                v-model="input.name"
+                type="text"
+                class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+                placeholder="品名"
+                @input="verifyInput()"
+              />
+            </div>
+            <div class="flex">
+              <input
+                :ref="form['brand']"
+                v-model="input.brand"
+                type="text"
+                class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+                placeholder="品牌"
+                @input="verifyInput()"
               />
             </div>
             <div class="flex">
@@ -263,10 +296,13 @@
               <option value="2">家樂福</option>
             </select>
             <input
+              :ref="form['price']"
               v-model="input.price"
-              type="text"
+              type="number"
+              step="0.1"
               class="h-10 w-1/4 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
               placeholder="單件金額"
+              @input="verifyInput()"
             />
             <select
               v-model="input.discount"
@@ -331,7 +367,7 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onBeforeUpdate, onMounted } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -367,11 +403,16 @@ export default {
       discount: null,
       date: '2022-06-22',
     };
+    const form = {
+      name: ref(null),
+      brand: ref(null),
+      price: ref(null),
+    };
+
     // search
     const search = ref(null);
     const searchSuggest = ref(null);
     const searchOptions = ref(null);
-    // const domParser = ref(new DOMParser());
 
     // sort options
     const openSortOption = () => {
@@ -384,6 +425,26 @@ export default {
       sortSelector.value.innerHTML = opt;
 
       isSortOpen.value = false; // close sort menu
+    };
+
+    const sortProductList = (params) => {
+      setSortOption(params.event);
+
+      axios
+        .get(`/api/GET/products?sort=true&sortField=${params.field}&sortType=${params.type}`)
+        .then((response) => {
+          // console.log('goSearch GET response', response);
+          products.value = response.data.map((item) => {
+            const temp = item;
+            if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
+            else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
+
+            return temp;
+          });
+        })
+        .catch((error) => {
+          console.error(error);
+        });
     };
 
     // product list
@@ -439,7 +500,31 @@ export default {
       input.img = fileInput.value.files[0].name;
     };
 
+    const focusInput = (field) => {
+      form[field].value.classList.add('border-red-400', 'focus:border-red-400');
+
+      return false;
+    };
+
+    const restoreInput = (field) => {
+      form[field].value.classList.remove('border-red-400', 'focus:border-red-400');
+    };
+
+    const verifyInput = () => {
+      restoreInput('name');
+      restoreInput('brand');
+      restoreInput('price');
+
+      if (!input.name) return focusInput('name');
+      if (!input.brand) return focusInput('brand');
+      if (!input.price) return focusInput('price');
+
+      return true;
+    };
+
     const saveProduct = () => {
+      if (!verifyInput()) return;
+
       const params = {
         belongid: 0,
         pic: input.img,
@@ -527,6 +612,10 @@ export default {
     };
 
     // life-cycle
+    onBeforeUpdate(() => {
+      // form.value = [];
+    });
+
     onMounted(() => {
       getProductList();
     });
@@ -538,6 +627,7 @@ export default {
       sortOption,
       openSortOption,
       setSortOption,
+      sortProductList,
 
       // new a product
       products,
@@ -563,6 +653,10 @@ export default {
       filterSearchOptions,
       changeSearch,
       goSearch,
+
+      // form
+      form,
+      verifyInput,
     };
   },
 };

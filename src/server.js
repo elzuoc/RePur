@@ -57,11 +57,40 @@ export default function makeServer({ environment = 'development' } = {}) {
       this.get('/api/GET/products', (schema, request) => {
         let mainProds = schema.db.products.filter((item) => !item.belongid);
 
+        // query: search
         if (
           Object.prototype.hasOwnProperty.call(request.queryParams, 'search') &&
           request.queryParams.search !== 'null'
         )
           mainProds = mainProds.filter((item) => item.name.includes(request.queryParams.search));
+
+        // query: sort
+        if (
+          Object.prototype.hasOwnProperty.call(request.queryParams, 'sort') &&
+          request.queryParams.sort
+        ) {
+          mainProds = mainProds.sort((current, next) => {
+            let isCurrentLarger = false;
+
+            if (request.queryParams.sortField === 'buy_date') {
+              isCurrentLarger =
+                new Date(current[request.queryParams.sortField]) >
+                new Date(next[request.queryParams.sortField]);
+            }
+
+            // console.log('isCurrentLarger', isCurrentLarger);
+            console.log('request.queryParams.sortType', request.queryParams.sortType);
+            console.log('isCurrentLarger', isCurrentLarger);
+            if (
+              (request.queryParams.sortType === 'asc' && isCurrentLarger) ||
+              (request.queryParams.sortType === 'desc' && !isCurrentLarger)
+            )
+              return 1;
+
+            return -1;
+          });
+          console.log('mainProds', mainProds);
+        }
 
         return mainProds;
       });
