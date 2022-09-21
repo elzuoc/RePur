@@ -13,7 +13,7 @@
       </div>
     </div>
 
-    <div
+    <!-- <div
       class="w-full border-2 border-dashed border-slate-300 text-slate-300 rounded bg-white p-2 mt-2"
     >
       <div class="w-full bg-zinc-300 text-zinc-800 rounded bg-white p-2 text-left">匯出狀態：</div>
@@ -30,9 +30,9 @@
         匯出程序已完成 ...
         <span class="text-green-800" @click="getProductList()">開啟檔案</span>
       </div>
-    </div>
+    </div> -->
   </div>
-  <canvas ref="photoCanvas" width="50" height="50"></canvas>
+  <canvas ref="photoCanvas" width="50" height="50" class="hidden"></canvas>
 </template>
 
 <script>
