@@ -7,20 +7,20 @@
       <div class="flex col-span-2">
         <div class="flex grid gap-1 text-left">
           <div class="flex h-5 overflow-hidden">
-            <span class="font-bold truncate"
-              >品名品名品名品名品名品名品名品名品名品名品名品名品名品名品名</span
-            >
+            <span class="font-bold truncate">{{ mainInfo.name }}</span>
           </div>
-          <div class="flex">品牌全名/容量</div>
-          <div class="flex"><span class="text-xs">購自</span>&nbsp;全聯</div>
+          <div class="flex">{{ mainInfo.brand }}/{{ mainInfo.capacity }}</div>
+          <div class="flex"><span class="text-xs">購自</span>&nbsp;{{ mainInfo.channel }}</div>
           <div class="flex">
-            <span class="text-[0.75rem]">NT$</span>30
+            <span class="text-[0.75rem]">NT$</span>{{ mainInfo.price }}
             <div
+              v-if="mainInfo.discount"
               class="w-fit h-fit inline-block text-[0.75rem] px-1 bg-amber-500 text-white rounded ml-2"
             >
               特惠活動
             </div>
             <div
+              v-if="!mainInfo.discount"
               class="w-fit h-fit inline-block text-[0.75rem] px-1 bg-emerald-500 text-white rounded ml-2"
             >
               最便宜
@@ -36,11 +36,7 @@
             <input type="date" class="border w-full rounded" />
           </div>
           <div class="flex">
-            <input
-              type="text"
-              class="border w-full rounded"
-              placeholder="平均單件價格"
-            />
+            <input type="text" class="border w-full rounded" placeholder="平均單件價格" />
           </div>
           <div class="flex">
             <select class="border w-full rounded">
@@ -49,10 +45,7 @@
             </select>
           </div>
           <div class="flex">
-            <button
-              type="button"
-              class="border w-full bg-emerald-500 text-white rounded"
-            >
+            <button type="button" class="border w-full bg-emerald-500 text-white rounded">
               新增
             </button>
           </div>
@@ -166,8 +159,9 @@
 
 <script>
 // import { ref } from 'vue';
-import { onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
+import axios from 'axios';
 
 export default {
   name: 'ProdDetail',
@@ -179,12 +173,47 @@ export default {
   },
   setup() {
     const route = useRoute();
+    let mainId = null;
+    const mainInfo = ref({});
 
+    const parseChannel = (channelId) => {
+      axios
+        .get(`/api/GET/channels?parse=${channelId}`)
+        .then((response) => {
+          // console.log(response);
+          mainInfo.value.channel = response.data.fullname;
+        })
+        .catch((error) => console.log(error));
+    };
+
+    const getMainProductInfo = () => {
+      axios
+        .get(`/api/GET/product/${mainId}`)
+        .then((response) => {
+          // console.log(response.data);
+          const resData = response.data;
+          mainInfo.value.name = resData.name;
+          mainInfo.value.brand = resData.brand;
+          mainInfo.value.capacity = resData.weight + resData.unit;
+          mainInfo.value.price = resData.price;
+          parseChannel(resData.sales_channel);
+          mainInfo.value.discount = resData.discount === '1';
+        })
+        .catch((error) => console.log(error));
+    };
+
+    // life cycle
     onMounted(() => {
       const { id } = route.params;
-      console.log(id);
+      mainId = id;
+      console.log(mainId);
+      getMainProductInfo();
     });
-    return {};
+
+    return {
+      getMainProductInfo,
+      mainInfo,
+    };
   },
 };
 </script>

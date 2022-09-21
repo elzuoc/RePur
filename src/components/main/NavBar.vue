@@ -4,13 +4,13 @@
       <div class="relative flex items-center justify-between h-12">
         <router-link to="/">
           <img
-            class="block md:hidden h-6 w-auto ml-2.5 text-black"
+            class="block h-6 w-auto ml-2.5 text-black"
             src="@/assets/img/logo_01.png"
             alt="Workflow"
         /></router-link>
 
         <div class="inline-flex h-6">
-          <div>Page Title</div>
+          <div>{{ pageTitle }}</div>
 
           <SideMenu /><!-- Mobile menu button-->
         </div>
@@ -20,7 +20,8 @@
 </template>
 
 <script>
-import { ref, onMounted } from 'vue';
+import { ref, onMounted, onBeforeMount } from 'vue';
+import { useRoute } from 'vue-router';
 import SideMenu from '../SideMenu.vue';
 
 export default {
@@ -29,6 +30,8 @@ export default {
     SideMenu,
   },
   setup() {
+    const route = useRoute();
+    const pageTitle = ref(null);
     const isMenuToggleOn = ref(false);
     const isUserToggleOn = ref(false);
     const navbar = ref(null);
@@ -54,12 +57,28 @@ export default {
       navbar.value.style.transition = 'all .3s';
     };
 
+    onBeforeMount(() => {
+      const path = route.path.replace('/', '');
+      console.log(path);
+      switch (path) {
+        case 'SalesChannel':
+          pageTitle.value = '購物管道設定';
+          break;
+        case 'Export':
+          pageTitle.value = '匯出商品紀錄';
+          break;
+        default:
+          pageTitle.value = '慣購清單';
+          break;
+      }
+    });
     onMounted(() => {
       // window.addEventListener('scroll', handleScroll());
       window.addEventListener('scroll', (e) => handleScroll(e));
     });
 
     return {
+      pageTitle,
       // params
       isMenuToggleOn,
       isUserToggleOn,

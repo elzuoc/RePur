@@ -32,7 +32,7 @@ export default function makeServer({ environment = 'development' } = {}) {
             weight: '900',
             unit: 'ml',
             sales_channel: '2',
-            discount: '0',
+            discount: '1',
             buy_date: '2022-06-23',
           },
           {
@@ -83,7 +83,7 @@ export default function makeServer({ environment = 'development' } = {}) {
     routes() {
       // all product
       this.get('/api/GET/products', (schema, request) => {
-        let mainProds = schema.db.products.filter((item) => !item.belongid);
+        let mainProds = schema.db.products.filter((item) => item.belongid === 0);
 
         // query: search
         if (
@@ -123,6 +123,12 @@ export default function makeServer({ environment = 'development' } = {}) {
         return mainProds;
       });
 
+      // get one product
+      this.get('/api/GET/product/:id', (schema, request) => {
+        const { id } = request.params;
+        return schema.db.products.findBy({ id });
+      });
+
       // new one product
       let newId = 4;
       this.post('/api/POST/product', (schema, request) => {
@@ -139,12 +145,12 @@ export default function makeServer({ environment = 'development' } = {}) {
       this.get('/api/GET/channels', (schema, request) => {
         let { channels } = schema.db;
 
-        // query: search
+        // query: parse
         if (
-          Object.prototype.hasOwnProperty.call(request.queryParams, 'search') &&
-          request.queryParams.search !== 'null'
+          Object.prototype.hasOwnProperty.call(request.queryParams, 'parse') &&
+          request.queryParams.parse !== 'null'
         )
-          channels = channels.filter((item) => item.name.includes(request.queryParams.search));
+          channels = channels.findBy({ id: request.queryParams.parse });
 
         return channels;
       });

@@ -107,7 +107,11 @@
       <router-link
         v-for="item in products"
         :key="item"
-        :to="{ path: '/ProdDetail', name: 'ProdDetail', params: { id: '3' } }"
+        :to="{
+          path: '/ProdDetail',
+          name: 'ProdDetail',
+          params: { id: item.id },
+        }"
       >
         <div class="flex grid grid-cols-3 gap-1 border">
           <div class="flex">
