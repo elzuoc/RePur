@@ -81,7 +81,7 @@
           日期 舊→新
           <div class="hidden">buy_date-asc</div>
         </div>
-        <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
+        <!-- <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
           <img src="@/assets/icons/sort-desc.svg" class="w-5 inline-block" />
           頻率 多→少
           <div class="hidden">times-desc</div>
@@ -98,7 +98,7 @@
         <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
           <img src="@/assets/icons/star.svg" class="w-5 inline-block" />
           品牌
-        </div>
+        </div> -->
       </div>
     </div>
 
@@ -200,24 +200,6 @@
         </div>
         <div class="flex col-span-2">
           <div class="grid grid-rows-3 gap-2">
-            <!-- <div class="flex">
-              <input
-                ref="name"
-                v-model="input.name"
-                type="text"
-                class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
-                placeholder="品名"
-              />
-            </div>
-            <div class="flex">
-              <input
-                ref="brand"
-                v-model="input.brand"
-                type="text"
-                class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
-                placeholder="品牌"
-              />
-            </div> -->
             <div class="flex">
               <input
                 :ref="form['name']"
@@ -322,32 +304,6 @@
           </div>
         </div>
       </div>
-      <!-- <div class="p-2 grid grid-rows-3 w-full">
-        <div class="flex w-full">
-          <div class="w-full border border-zinc-300 rounded">
-            <input
-              ref="fileInput"
-              type="file"
-              class="hidden"
-              @change="getFileInfo()"
-            />
-            <input
-              ref="fileInfo"
-              type="text"
-              class="inline-flex h-10 px-2 focus:outline-none rounded-l w-[calc(100%-5rem)] focus:border-2 focus:border-zinc-300 text-xs cursor-pointer"
-              placeholder="未選取圖片"
-              readonly="readonly"
-              @click="openFile()"
-            />
-            <div
-              class="w-20 h-10 p-2 bg-zinc-600 rounded-r text-white inline-flex cursor-pointer"
-              @click="openFile()"
-            >
-              選擇圖片
-            </div>
-          </div>
-        </div>
-      </div> -->
     </div>
     <div class="w-full border-t p-2">
       <button
@@ -367,7 +323,7 @@
 </template>
 
 <script>
-import { ref, onBeforeUpdate, onMounted } from 'vue';
+import { ref, onMounted } from 'vue';
 import axios from 'axios';
 
 export default {
@@ -612,10 +568,6 @@ export default {
     };
 
     // life-cycle
-    onBeforeUpdate(() => {
-      // form.value = [];
-    });
-
     onMounted(() => {
       getProductList();
     });

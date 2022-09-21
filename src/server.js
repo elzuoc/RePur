@@ -49,6 +49,34 @@ export default function makeServer({ environment = 'development' } = {}) {
             buy_date: '2022-06-24',
           },
         ],
+
+        channels: [
+          {
+            id: 1,
+            fullname: '全聯福利中心',
+            shortname: '全聯',
+          },
+          {
+            id: 2,
+            fullname: '蝦皮購物中心',
+            shortname: '蝦皮',
+          },
+          {
+            id: 3,
+            fullname: 'PCHome24',
+            shortname: 'PCHome24',
+          },
+          {
+            id: 4,
+            fullname: 'MONO購物中心',
+            shortname: 'MOMO',
+          },
+          {
+            id: 5,
+            fullname: '家樂福',
+            shortname: '家樂福',
+          },
+        ],
       });
     },
 
@@ -105,6 +133,46 @@ export default function makeServer({ environment = 'development' } = {}) {
         attrs.id = newId;
 
         return schema.db.products.insert(attrs);
+      });
+
+      // channel
+      this.get('/api/GET/channels', (schema, request) => {
+        let { channels } = schema.db;
+
+        // query: search
+        if (
+          Object.prototype.hasOwnProperty.call(request.queryParams, 'search') &&
+          request.queryParams.search !== 'null'
+        )
+          channels = channels.filter((item) => item.name.includes(request.queryParams.search));
+
+        return channels;
+      });
+
+      // new one channel
+      let newChannelId = 6;
+      this.post('/api/POST/channels', (schema, request) => {
+        const attrs = JSON.parse(request.requestBody);
+        newChannelId += 1;
+        attrs.id = newChannelId;
+
+        return schema.db.channels.insert(attrs);
+      });
+
+      // update one channel
+      this.patch('/api/PATCH/channels/:id', (schema, request) => {
+        // console.log(schema, request);
+        const newAttrs = JSON.parse(request.requestBody);
+        const { id } = request.params;
+
+        return schema.db.channels.update(id, newAttrs);
+      });
+
+      // delete one channel
+      this.delete('/api/DELETE/channels/:id', (schema, request) => {
+        const { id } = request.params;
+        return schema.db.channels.remove(id);
+        // return schema.db.channels.find(Number(id));
       });
     },
   });

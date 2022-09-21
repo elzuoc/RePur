@@ -1,5 +1,4 @@
 import { createRouter, createWebHistory } from 'vue-router';
-import IndexCompo from '@/views/Index/index.vue';
 import BuyList from '@/views/BuyList/index.vue';
 import ProdDetail from '@/views/ProdDetail/index.vue';
 import SalesChannel from '@/views/SalesChannel/index.vue';
@@ -10,10 +9,6 @@ export default createRouter({
   routes: [
     {
       path: '/',
-      component: IndexCompo,
-    },
-    {
-      path: '/BuyList',
       component: BuyList,
     },
     {
