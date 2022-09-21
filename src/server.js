@@ -120,6 +120,13 @@ export default function makeServer({ environment = 'development' } = {}) {
           console.log('mainProds', mainProds);
         }
 
+        // query: belongid
+        if (Object.prototype.hasOwnProperty.call(request.queryParams, 'belongid')) {
+          mainProds = schema.db.products.filter(
+            (item) => item.belongid === Number(request.queryParams.belongid)
+          );
+        }
+
         return mainProds;
       });
 

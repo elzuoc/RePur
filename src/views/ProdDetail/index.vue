@@ -2,7 +2,16 @@
   <div class="container mx-auto px-4">
     <div class="flex grid grid-cols-3 gap-1 border">
       <div class="flex">
-        <div class="aspect-square bg-zinc-200 w-full"></div>
+        <div class="aspect-square bg-zinc-200 w-full">
+          <img
+            v-cloak
+            :src="
+              'https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/' +
+              mainInfo.pic
+            "
+            class="w-full"
+          />
+        </div>
       </div>
       <div class="flex col-span-2">
         <div class="flex grid gap-1 text-left">
@@ -33,13 +42,22 @@
       <div class="mt-4 py-4 border-y-2 border-zinc-200 border-dashed w-full">
         <div class="grid grid-cols-4 gap-1">
           <div class="flex">
-            <input type="date" class="border w-full rounded" />
+            <input
+              type="date"
+              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+            />
           </div>
           <div class="flex">
-            <input type="text" class="border w-full rounded" placeholder="平均單件價格" />
+            <input
+              type="text"
+              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              placeholder="平均單件價格"
+            />
           </div>
           <div class="flex">
-            <select class="border w-full rounded">
+            <select
+              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+            >
               <option value="">特惠活動價</option>
               <option value="">日常價</option>
             </select>
@@ -54,21 +72,34 @@
     </div>
     <div class="w-full mt-4 grid grid-cols-2 gap-2">
       <!-- one product -->
-      <div class="flex grid grid-cols-3 gap-1 border">
+      <div
+        v-for="subprod in subProductList"
+        :key="subprod"
+        class="flex grid grid-cols-3 gap-1 border"
+      >
         <div class="flex">
-          <div class="aspect-square bg-zinc-200 w-full"></div>
+          <div class="aspect-square bg-zinc-200 w-full">
+            <img
+              :src="
+                'https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/' +
+                subprod.pic
+              "
+              class="w-full"
+            />
+          </div>
         </div>
         <div class="flex col-span-2">
           <div class="flex grid gap-1">
             <div class="flex h-5 overflow-hidden">
-              <span class="font-bold truncate"
-                >品名品名品名品名品名品名品名品名品名品名品名品名品名品名品名</span
-              >
+              <span class="font-bold truncate">{{ subprod.name }}</span>
             </div>
-            <div class="flex"><span class="text-xs">品牌簡稱/容量</span></div>
             <div class="flex">
-              <span class="text-[0.75rem]">NT$</span>30
+              <span class="text-xs">{{ subprod.brand }}/{{ subprod.weight + subprod.unit }}</span>
+            </div>
+            <div class="flex">
+              <span class="text-[0.75rem]">NT$</span>{{ subprod.price }}
               <div
+                v-if="subprod.discount === '1'"
                 class="w-fit h-fit inline-block text-[0.75rem] px-1 bg-amber-500 text-white rounded ml-2"
               >
                 特惠活動
@@ -80,76 +111,8 @@
               </div>
             </div>
             <div class="w-full text-zinc-500 text-right px-1">
-              <div class="text-sm">2022-06-21</div>
+              <div class="text-sm">{{ subprod.buy_date }}</div>
             </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex grid grid-cols-3 gap-1 border">
-        <div class="flex">
-          <div class="aspect-square bg-zinc-200 w-full"></div>
-        </div>
-        <div class="flex col-span-2">
-          <div class="flex grid gap-1 text-left">
-            <div class="flex h-5 overflow-hidden">
-              <span class="font-bold truncate"
-                >品名品名品名品名品名品名品名品名品名品名品名品名品名品名品名</span
-              >
-            </div>
-            <div class="flex"><span class="text-xs">品牌簡稱/容量</span></div>
-            <div class="flex"><span class="text-[0.75rem]">NT$</span>30</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex grid grid-cols-3 gap-1 border">
-        <div class="flex">
-          <div class="aspect-square bg-zinc-200 w-full"></div>
-        </div>
-        <div class="flex col-span-2">
-          <div class="flex grid gap-1 text-left">
-            <div class="flex h-5 overflow-hidden">
-              <span class="font-bold truncate"
-                >品名品名品名品名品名品名品名品名品名品名品名品名品名品名品名</span
-              >
-            </div>
-            <div class="flex"><span class="text-xs">品牌簡稱/容量</span></div>
-            <div class="flex"><span class="text-[0.75rem]">NT$</span>30</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex grid grid-cols-3 gap-1 border">
-        <div class="flex">
-          <div class="aspect-square bg-zinc-200 w-full"></div>
-        </div>
-        <div class="flex col-span-2">
-          <div class="flex grid gap-1 text-left">
-            <div class="flex h-5 overflow-hidden">
-              <span class="font-bold truncate"
-                >品名品名品名品名品名品名品名品名品名品名品名品名品名品名品名</span
-              >
-            </div>
-            <div class="flex"><span class="text-xs">品牌簡稱/容量</span></div>
-            <div class="flex"><span class="text-[0.75rem]">NT$</span>30</div>
-          </div>
-        </div>
-      </div>
-
-      <div class="flex grid grid-cols-3 gap-1 border">
-        <div class="flex">
-          <div class="aspect-square bg-zinc-200 w-full"></div>
-        </div>
-        <div class="flex col-span-2">
-          <div class="flex grid gap-1 text-left">
-            <div class="flex h-5 overflow-hidden">
-              <span class="font-bold truncate"
-                >品名品名品名品名品名品名品名品名品名品名品名品名品名品名品名</span
-              >
-            </div>
-            <div class="flex"><span class="text-xs">品牌簡稱/容量</span></div>
-            <div class="flex"><span class="text-[0.75rem]">NT$</span>30</div>
           </div>
         </div>
       </div>
@@ -175,6 +138,7 @@ export default {
     const route = useRoute();
     let mainId = null;
     const mainInfo = ref({});
+    const subProductList = ref(null);
 
     const parseChannel = (channelId) => {
       axios
@@ -192,6 +156,7 @@ export default {
         .then((response) => {
           // console.log(response.data);
           const resData = response.data;
+          mainInfo.value.pic = resData.pic;
           mainInfo.value.name = resData.name;
           mainInfo.value.brand = resData.brand;
           mainInfo.value.capacity = resData.weight + resData.unit;
@@ -202,17 +167,30 @@ export default {
         .catch((error) => console.log(error));
     };
 
+    const getSubProductList = () => {
+      axios
+        .get(`/api/GET/products?belongid=${mainId}`)
+        .then((response) => {
+          console.log(response.data);
+          subProductList.value = response.data;
+        })
+        .catch((error) => console.log(error));
+    };
+
     // life cycle
     onMounted(() => {
       const { id } = route.params;
       mainId = id;
-      console.log(mainId);
+      // console.log(mainId);
       getMainProductInfo();
+      getSubProductList();
     });
 
     return {
       getMainProductInfo,
       mainInfo,
+      getSubProductList,
+      subProductList,
     };
   },
 };
