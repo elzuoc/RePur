@@ -16,6 +16,8 @@ export default function makeServer({ environment = 'development' } = {}) {
             name: '韓式泡菜',
             brand: '慶尚北道',
             price: '200',
+            isHighest: true,
+            isLowest: false,
             weight: '600',
             unit: 'g',
             sales_channel: '1',
@@ -29,6 +31,8 @@ export default function makeServer({ environment = 'development' } = {}) {
             name: '農榨金桔檸檬飲',
             brand: '味全',
             price: '45',
+            isHighest: true,
+            isLowest: false,
             weight: '900',
             unit: 'ml',
             sales_channel: '2',
@@ -42,6 +46,23 @@ export default function makeServer({ environment = 'development' } = {}) {
             name: '韓式泡菜',
             brand: '慶尚北道',
             price: '188',
+            isHighest: false,
+            isLowest: false,
+            weight: '600',
+            unit: 'g',
+            sales_channel: '1',
+            discount: '1',
+            buy_date: '2022-06-24',
+          },
+          {
+            id: 4,
+            belongid: 1,
+            pic: 'pickle.jpg',
+            name: '韓式泡菜',
+            brand: '慶尚北道',
+            price: '165',
+            isHighest: false,
+            isLowest: true,
             weight: '600',
             unit: 'g',
             sales_channel: '1',
@@ -139,13 +160,22 @@ export default function makeServer({ environment = 'development' } = {}) {
       // new one product
       let newId = 4;
       this.post('/api/POST/product', (schema, request) => {
-        // console.log('request', request);
-        // console.log('schema', schema);
+        console.log('request', request);
+        console.log('schema', schema);
         const attrs = JSON.parse(request.requestBody);
         newId += 1;
         attrs.id = newId;
-
+        console.log('attrs', attrs);
         return schema.db.products.insert(attrs);
+      });
+
+      // update one product
+      this.patch('/api/PATCH/products/:id', (schema, request) => {
+        // console.log(schema, request);
+        const newAttrs = JSON.parse(request.requestBody);
+        const { id } = request.params;
+
+        return schema.db.products.update(id, newAttrs);
       });
 
       // channel
