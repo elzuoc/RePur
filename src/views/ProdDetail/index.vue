@@ -18,12 +18,12 @@
           <div class="flex h-5 overflow-hidden">
             <span class="font-bold truncate">{{ mainInfo.name }}</span>
           </div>
-          <div class="flex">{{ mainInfo.brand }}/{{ mainInfo.capacity }}</div>
-          <div class="flex"><span class="text-xs">購自</span>&nbsp;{{ mainInfo.channel }}</div>
+          <div class="flex">{{ mainInfo.brand }}/{{ mainInfo.weight + mainInfo.unit }}</div>
+          <div class="flex"><span class="text-xs">購自</span>&nbsp;{{ mainInfo.channelTitle }}</div>
           <div class="flex">
             <span class="text-[0.75rem]">NT$</span>{{ mainInfo.price }}
             <div
-              v-if="mainInfo.discount"
+              v-if="mainInfo.discount === 1"
               class="w-fit h-fit inline-block text-[0.75rem] px-1 bg-amber-500 text-white rounded ml-2"
             >
               特惠活動
@@ -188,7 +188,7 @@ export default {
         .get(`/api/GET/channels?parse=${channelId}`)
         .then((response) => {
           // console.log(response);
-          mainInfo.value.channel = response.data.fullname;
+          mainInfo.value.channelTitle = response.data.fullname;
         })
         .catch((error) => console.log(error));
     };
@@ -199,17 +199,8 @@ export default {
         .then((response) => {
           // console.log(response.data);
           const resData = response.data;
-          mainInfo.value.pic = resData.pic;
-          mainInfo.value.name = resData.name;
-          mainInfo.value.brand = resData.brand;
-          mainInfo.value.weight = resData.weight;
-          mainInfo.value.unit = resData.unit;
-          mainInfo.value.capacity = resData.weight + resData.unit;
-          mainInfo.value.price = resData.price;
+          mainInfo.value = resData;
           parseChannel(resData.sales_channel);
-          mainInfo.value.discount = resData.discount === '1';
-          mainInfo.value.isHighest = resData.isHighest;
-          mainInfo.value.isLowest = resData.isLowest;
         })
         .catch((error) => console.log(error));
     };
@@ -243,7 +234,10 @@ export default {
         if (findMaxPrice && newPrice > Number(findMaxPrice.price)) {
           originMaxMin.max = findMaxPrice;
           maxFlag = true;
-        } else if (!findMaxPrice) maxFlag = true;
+        } else if (!findMaxPrice && mainInfo.value.isHighest) {
+          originMaxMin.max = mainInfo.value;
+          maxFlag = true;
+        }
       }
 
       return maxFlag;
@@ -265,15 +259,16 @@ export default {
     };
 
     const adjustHighestSet = () => {
+      console.log('adjustHighestSet', originMaxMin.max);
       originMaxMin.max.isHighest = false;
       return axios
-        .patch(`/api/PATCH/channels/${originMaxMin.max.id}`, originMaxMin.max)
+        .patch(`/api/PATCH/products/${originMaxMin.max.id}`, originMaxMin.max)
         .catch((error) => console.log(error));
     };
     const adjustLowestSet = () => {
       originMaxMin.min.isLowest = false;
       return axios
-        .patch(`/api/PATCH/channels/${originMaxMin.min.id}`, originMaxMin.min)
+        .patch(`/api/PATCH/products/${originMaxMin.min.id}`, originMaxMin.min)
         .catch((error) => console.log(error));
     };
 
@@ -292,7 +287,7 @@ export default {
         discount: input.discount,
         buy_date: input.date,
       };
-      console.log('params', params);
+      // console.log('params', params);
       axios
         .post('/api/POST/product', params)
         .then(() => {
@@ -309,7 +304,6 @@ export default {
           } else {
             getMainProductInfo();
             getSubProductList();
-            console.log('else');
           }
         })
         .catch((error) => {
