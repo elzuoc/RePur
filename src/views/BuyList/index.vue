@@ -118,7 +118,10 @@
             <div
               class="aspect-square bg-zinc-200 w-full"
               :style="{
-                'background-image': 'url(/src/assets/uploads/' + item.pic + ')',
+                'background-image':
+                  'url(https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/' +
+                  item.pic +
+                  ')',
                 'background-size': 'cover',
               }"
             ></div>
