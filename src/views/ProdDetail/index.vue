@@ -49,23 +49,29 @@
         <div class="grid grid-cols-5 gap-1">
           <div class="flex">
             <input
+              :ref="form['date']"
               v-model="input.date"
               type="date"
               class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              @input="verifyInput()"
             />
           </div>
           <div class="flex">
             <input
+              :ref="form['price']"
               v-model="input.price"
-              type="text"
+              type="number"
               class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
               placeholder="平均單件價格"
+              @input="verifyInput()"
             />
           </div>
           <div class="flex">
             <select
+              :ref="form['discount']"
               v-model="input.discount"
               class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              @change="verifyInput()"
             >
               <option value="" disabled>價格類型...</option>
               <option value="1">特惠活動價</option>
@@ -74,8 +80,10 @@
           </div>
           <div class="flex">
             <select
+              :ref="form['channel']"
               v-model="input.channel"
               class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              @change="verifyInput()"
             >
               <option value="" disabled>購物管道...</option>
               <option v-for="item in channels" :key="item" :value="item.id">
@@ -172,6 +180,12 @@ export default {
     const mainInfo = ref({});
     const subProductList = ref(null);
     const channels = ref(null);
+    const form = {
+      date: ref(null),
+      price: ref(null),
+      discount: ref(null),
+      channel: ref(null),
+    };
     const input = {
       date: null,
       price: null,
@@ -209,7 +223,7 @@ export default {
       axios
         .get(`/api/GET/products?belongid=${mainId}`)
         .then((response) => {
-          console.log('getSubProductList', response.data);
+          // console.log('getSubProductList', response.data);
           subProductList.value = response.data;
         })
         .catch((error) => console.log(error));
@@ -223,6 +237,34 @@ export default {
           channels.value = res.data;
         })
         .catch((error) => console.log(error));
+    };
+
+    const focusInput = (field) => {
+      form[field].value.classList.add('border-red-400', 'focus:border-red-400');
+
+      return false;
+    };
+    const restoreInput = (field) => {
+      form[field].value.classList.remove('border-red-400', 'focus:border-red-400');
+    };
+    const verifyInput = () => {
+      restoreInput('date');
+      restoreInput('price');
+      restoreInput('discount');
+      restoreInput('channel');
+
+      if (!input.date) return focusInput('date');
+      if (!input.price) return focusInput('price');
+      if (!input.discount) return focusInput('discount');
+      if (!input.channel) return focusInput('channel');
+
+      return true;
+    };
+    const initInputParams = () => {
+      input.date = null;
+      input.price = null;
+      input.discount = '';
+      input.channel = '';
     };
 
     const isHighest = () => {
@@ -259,7 +301,6 @@ export default {
     };
 
     const adjustHighestSet = () => {
-      console.log('adjustHighestSet', originMaxMin.max);
       originMaxMin.max.isHighest = false;
       return axios
         .patch(`/api/PATCH/products/${originMaxMin.max.id}`, originMaxMin.max)
@@ -273,6 +314,8 @@ export default {
     };
 
     const insertSubProduct = () => {
+      if (!verifyInput()) return;
+
       const params = {
         belongid: parseInt(mainId, 10),
         pic: mainInfo.value.pic,
@@ -305,6 +348,8 @@ export default {
             getMainProductInfo();
             getSubProductList();
           }
+
+          initInputParams();
         })
         .catch((error) => {
           console.error(error);
@@ -330,6 +375,8 @@ export default {
       input,
       channels,
       getChannelList,
+      form,
+      verifyInput,
     };
   },
 };

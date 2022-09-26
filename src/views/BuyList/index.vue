@@ -412,7 +412,7 @@ export default {
       axios
         .get('/api/GET/products')
         .then((response) => {
-          console.log('GET response', response);
+          // console.log('GET response', response);
           products.value = response.data.map((item) => {
             const temp = item;
             if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
