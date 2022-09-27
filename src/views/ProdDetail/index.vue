@@ -3,14 +3,7 @@
     <div class="flex grid grid-cols-3 gap-1 border">
       <div class="flex">
         <div class="aspect-square bg-zinc-200 w-full">
-          <img
-            v-cloak
-            :src="
-              'https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/' +
-              mainInfo.pic
-            "
-            class="w-full"
-          />
+          <img v-cloak :src="mainInfo.pic" class="w-full" />
         </div>
       </div>
       <div class="flex col-span-2">
@@ -112,13 +105,7 @@
       >
         <div class="flex">
           <div class="aspect-square bg-zinc-200 w-full">
-            <img
-              :src="
-                'https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/' +
-                subprod.pic
-              "
-              class="w-full"
-            />
+            <img :src="subprod.pic" class="w-full" />
           </div>
         </div>
         <div class="flex col-span-2">

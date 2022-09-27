@@ -115,13 +115,14 @@
       >
         <div class="flex grid grid-cols-3 gap-1 border">
           <div class="flex">
+            <!-- 'background-image':
+                  'url(https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/' +
+                  item.pic +
+                  ')'-->
             <div
               class="aspect-square bg-zinc-200 w-full"
               :style="{
-                'background-image':
-                  'url(https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/' +
-                  item.pic +
-                  ')',
+                'background-image': 'url(' + item.pic + ')',
                 'background-size': 'cover',
               }"
             ></div>
@@ -198,7 +199,7 @@
                 />
                 <input ref="fileName" v-model="input.img" type="text" class="hidden" />
 
-                <div class="absolute m-auto inset-0 w-fit h-fit">
+                <div ref="tempImg" class="absolute m-auto inset-0 w-fit h-fit">
                   <span class="text-white font-bold text-5xl">+</span>
                 </div>
               </div>
@@ -326,6 +327,8 @@
         OK
       </button>
     </div>
+
+    <canvas ref="photoCanvas" width="500" height="500" class="hidden"></canvas>
   </div>
 </template>
 
@@ -348,6 +351,7 @@ export default {
     const sortSelector = ref(null);
     const sortOption = ref(null);
     // new a product
+    const photoCanvas = ref(null);
     const products = ref(null);
     const modal = ref(null);
     const modalMask = ref(null);
@@ -355,6 +359,7 @@ export default {
     const isModalClose = ref(true);
     const fileInput = ref();
     const fileInfo = ref('');
+    const tempImg = ref(null);
     const input = {
       img: null,
       name: null,
@@ -446,11 +451,27 @@ export default {
     };
 
     // Input File Selector (one file)
+    const newImg = (src) => {
+      return new Promise((resolve, reject) => {
+        const img = new Image(500, 500);
+        img.onload = () => resolve(img);
+        img.onerror = () => reject(new Error('加載失敗'));
+        img.src = src;
+        img.crossOrigin = 'anonymous';
+      });
+    };
+
+    const getImage = async (src) => {
+      const img = await newImg(src);
+      return img;
+    };
+
     const openFile = () => {
       fileInput.value.click();
     };
     const getFileInfo = () => {
-      const { size } = fileInput.value.files[0]; // byte
+      const file = fileInput.value.files[0];
+      const { size } = file; // byte
       let sizeStr = null;
       if (size <= 1024) sizeStr = `${size}Byte | `;
       else if (size > 1024 && size <= 1048576) {
@@ -461,6 +482,22 @@ export default {
 
       fileInfo.value.value = sizeStr + fileInput.value.files[0].name;
       input.img = fileInput.value.files[0].name;
+
+      // 商品圖
+      const getCanvas = photoCanvas.value;
+      const ctx = getCanvas.getContext('2d');
+      const url = window.URL || window.webkitURL;
+      const imgSrc = url.createObjectURL(file);
+
+      getImage(imgSrc).then((img) => {
+        // console.log('img', img);
+        ctx.drawImage(img, 0, 0, 500, 500);
+        const dataBase64URL = getCanvas.toDataURL();
+
+        input.img = dataBase64URL;
+        tempImg.value.innerHTML = `<img src='${dataBase64URL}' width='100%'>`;
+        // console.log(dataBase64URL);
+      });
     };
 
     const focusInput = (field) => {
@@ -602,6 +639,8 @@ export default {
       getFileInfo,
       saveProduct,
       input,
+      photoCanvas,
+      tempImg,
 
       // search
       search,

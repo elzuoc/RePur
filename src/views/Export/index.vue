@@ -52,20 +52,20 @@ export default {
   setup() {
     const photoCanvas = ref(null);
 
-    const newImg = (src) => {
-      return new Promise((resolve, reject) => {
-        const img = new Image(50, 50);
-        img.onload = () => resolve(img);
-        img.onerror = () => reject(new Error('加載失敗'));
-        img.src = src;
-        img.crossOrigin = 'anonymous';
-      });
-    };
+    // const newImg = (src) => {
+    //   return new Promise((resolve, reject) => {
+    //     const img = new Image(50, 50);
+    //     img.onload = () => resolve(img);
+    //     img.onerror = () => reject(new Error('加載失敗'));
+    //     img.src = src;
+    //     img.crossOrigin = 'anonymous';
+    //   });
+    // };
 
-    const getImage = async (src) => {
-      const img = await newImg(src);
-      return img;
-    };
+    // const getImage = async (src) => {
+    //   const img = await newImg(src);
+    //   return img;
+    // };
 
     const exportExcel = async (dataList) => {
       const workbook = new ExcelJS.Workbook();
@@ -103,7 +103,7 @@ export default {
       //   { id: 1, name: 'John Doe', img: 'lemon.jpg' },
       //   { id: 2, name: 'Jane Doe', img: 'pickle.jpg' }
       // ];
-      console.log('dataList', dataList);
+      // console.log('dataList', dataList);
       for (let i = 0; i < dataList.length; i += 1) {
         worksheet.addRow({ id: dataList[i].id, name: dataList[i].name });
 
@@ -117,48 +117,71 @@ export default {
           };
         });
 
-        const getCanvas = photoCanvas.value;
-        const ctx = getCanvas.getContext('2d');
-        // const imgSrc = `/src/assets/uploads/${dataList[i].img}`;
-        const imgSrc = `https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/${dataList[i].img}`;
-        console.log('imgSrc', imgSrc);
-        getImage(imgSrc)
-          .then((img) => {
-            console.log('img', img);
-            ctx.drawImage(img, 0, 0, 50, 50);
-            const dataBase64URL = getCanvas.toDataURL();
-
-            return dataBase64URL;
-          })
-          .then((base64url) => {
-            console.log('base64url', base64url);
-            const imageId = workbook.addImage({
-              base64: base64url,
-              extension: 'jpg',
-            });
-
-            console.log('imageId', imageId);
-            // worksheet.addImage(imageId, `C${i + 2}:C${i + 2}`);
-            worksheet.addImage(imageId, {
-              tl: { col: 2, row: i + 1 },
-              ext: { width: 50, height: 50 },
-              hyperlinks: {
-                hyperlink: 'https://www.google.com.tw/',
-                tooltip: 'https://www.google.com.tw/',
-              },
-            });
-          })
-          .then(() => {
-            if (i === dataList.length - 1) {
-              const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-              const downloadDate = new Date().toISOString().substring(0, 10).replaceAll('-', '');
-              const filename = `${downloadDate}下載_RePur_商品紀錄.xlsx`;
-              workbook.xlsx.writeBuffer().then((data) => {
-                const blob = new Blob([data], { type: fileType });
-                saveAs(blob, filename);
-              });
-            }
+        const base64url = `${dataList[i].img}`;
+        // console.log('base64url', base64url);
+        const imageId = workbook.addImage({
+          base64: base64url,
+          extension: 'jpg',
+        });
+        worksheet.addImage(imageId, {
+          tl: { col: 2, row: i + 1 },
+          ext: { width: 50, height: 50 },
+          hyperlinks: {
+            hyperlink: 'https://www.google.com.tw/',
+            tooltip: 'https://www.google.com.tw/',
+          },
+        });
+        if (i === dataList.length - 1) {
+          const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+          const downloadDate = new Date().toISOString().substring(0, 10).replaceAll('-', '');
+          const filename = `${downloadDate}下載_RePur_商品紀錄.xlsx`;
+          workbook.xlsx.writeBuffer().then((data) => {
+            const blob = new Blob([data], { type: fileType });
+            saveAs(blob, filename);
           });
+        }
+
+        // const getCanvas = photoCanvas.value;
+        // const ctx = getCanvas.getContext('2d');
+        // const imgSrc = `https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/${dataList[i].img}`;
+        // console.log('imgSrc', imgSrc);
+        // getImage(imgSrc)
+        //   .then((img) => {
+        //     console.log('img', img);
+        //     ctx.drawImage(img, 0, 0, 50, 50);
+        //     const dataBase64URL = getCanvas.toDataURL();
+
+        //     return dataBase64URL;
+        //   })
+        //   .then((base64url) => {
+        //     console.log('base64url', base64url);
+        //     const imageId = workbook.addImage({
+        //       base64: base64url,
+        //       extension: 'jpg',
+        //     });
+
+        //     console.log('imageId', imageId);
+        //     // worksheet.addImage(imageId, `C${i + 2}:C${i + 2}`);
+        //     worksheet.addImage(imageId, {
+        //       tl: { col: 2, row: i + 1 },
+        //       ext: { width: 50, height: 50 },
+        //       hyperlinks: {
+        //         hyperlink: 'https://www.google.com.tw/',
+        //         tooltip: 'https://www.google.com.tw/',
+        //       },
+        //     });
+        //   })
+        //   .then(() => {
+        //     if (i === dataList.length - 1) {
+        //       const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+        //       const downloadDate = new Date().toISOString().substring(0, 10).replaceAll('-', '');
+        //       const filename = `${downloadDate}下載_RePur_商品紀錄.xlsx`;
+        //       workbook.xlsx.writeBuffer().then((data) => {
+        //         const blob = new Blob([data], { type: fileType });
+        //         saveAs(blob, filename);
+        //       });
+        //     }
+        //   });
       }
     };
 
@@ -166,7 +189,7 @@ export default {
       axios
         .get('/api/GET/products')
         .then((response) => {
-          console.log('GET response', response);
+          // console.log('GET response', response);
 
           const dataList = [];
           // products.value = response.data.map((item) => {
@@ -174,7 +197,7 @@ export default {
             const temp = item;
             if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
             else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
-            console.log(temp);
+            // console.log(temp);
             const obj = { id: temp.id, name: temp.name, img: temp.pic };
             dataList.push(obj);
             return temp;
