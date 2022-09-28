@@ -43,7 +43,7 @@
     >
       <div
         class="relative w-full h-20 border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
-        @click="openNewItemModal()"
+        @click="openNewItemModal"
       >
         <div class="absolute m-auto inset-0 w-fit h-fit">
           <span class="text-white font-bold tracking-wider">+ 慣購商品</span>
@@ -55,7 +55,7 @@
       <div
         ref="sortSelector"
         class="w-fit h-10 p-2 border border-zinc-300 text-zinc-500 cursor-pointer"
-        @click="openSortOption()"
+        @click="openSortOption"
       >
         <img src="@/assets/icons/sort-desc.svg" class="w-5 inline-block" />
         日期 新→舊
@@ -104,13 +104,22 @@
 
     <div class="w-full mt-4 grid grid-cols-2 gap-2">
       <!-- one product -->
-      <router-link
+      <!-- <router-link
         v-for="item in products"
         :key="item"
         :to="{
           path: '/ProdDetail',
           name: 'ProdDetail',
           params: { id: item.id },
+        }"
+      > -->
+      <router-link
+        v-for="item in products"
+        :key="item"
+        :to="{
+          path: '/ProdDetail',
+          name: 'ProdDetail',
+          query: { id: item.id },
         }"
       >
         <div class="flex grid grid-cols-3 gap-1 border">
@@ -130,9 +139,7 @@
           <div class="flex col-span-2">
             <div class="flex grid gap-1 text-left">
               <div class="flex h-5 overflow-hidden">
-                <span class="font-bold truncate">
-                  {{ item.name }}
-                </span>
+                <span class="font-bold truncate"> {{ item.name }} </span>
               </div>
               <div class="flex">
                 <span class="text-xs">
@@ -162,7 +169,7 @@
     ref="screenMask"
     class="fixed w-screen h-screen z-10 top-0 left-0 bg-white/[0] backdrop-blur-[1px]"
     :class="{ block: isSortOpen, hidden: !isSortOpen }"
-    @click="openSortOption()"
+    @click="openSortOption"
   ></div>
 
   <div ref="modalMask" class="fixed top-0 left-0 z-10 w-screen h-screen bg-black/[.5] hidden"></div>
@@ -181,26 +188,27 @@
             >
               <div
                 class="relative w-full h-full border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
-                @click="openFile()"
+                @click="openFile"
               >
                 <input
                   ref="fileInput"
                   type="file"
                   class="hidden"
                   accept="image/*"
-                  @change="getFileInfo()"
+                  @change="getFileInfo"
                 />
                 <input
                   ref="fileInfo"
                   type="text"
                   class="hidden"
                   placeholder="未選取圖片"
-                  @click="openFile()"
+                  @click="openFile"
                 />
                 <input ref="fileName" v-model="input.img" type="text" class="hidden" />
 
                 <div ref="tempImg" class="absolute m-auto inset-0 w-fit h-fit">
-                  <span class="text-white font-bold text-5xl">+</span>
+                  <span v-if="!dataBase64URL" class="text-white font-bold text-5xl">+</span>
+                  <img v-if="dataBase64URL" :src="dataBase64URL" class="w-full" />
                 </div>
               </div>
             </div>
@@ -213,9 +221,12 @@
                 :ref="form['name']"
                 v-model="input.name"
                 type="text"
-                class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+                :class="{
+                  'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                  'border-red-400 focus:border-red-400': isVerify && focusName,
+                }"
                 placeholder="品名"
-                @input="verifyInput()"
+                @input="verifyInput"
               />
             </div>
             <div class="flex">
@@ -223,9 +234,12 @@
                 :ref="form['brand']"
                 v-model="input.brand"
                 type="text"
-                class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+                :class="{
+                  'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                  'border-red-400 focus:border-red-400': isVerify && focusBrand,
+                }"
                 placeholder="品牌"
-                @input="verifyInput()"
+                @input="verifyInput"
               />
             </div>
             <div class="flex">
@@ -240,35 +254,9 @@
                 class="h-10 w-1/2 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
               >
                 <option value="" selected disabled>單位</option>
-                <option value="單位">其他單位</option>
-                <option value="g">g/克</option>
-                <option value="kg">kg/公斤</option>
-                <option value="ml">ml/毫升</option>
-                <option value="L">L/公升</option>
-                <option value="cm">cm/公分</option>
-                <option value="m">m/公尺</option>
-                <option value="inch">inch/英吋</option>
-                <option value="EU">EU/歐碼</option>
-                <option value="UK">UK/英國碼</option>
-                <option value="US">US/美國碼</option>
-                <option value="S">S</option>
-                <option value="M">M</option>
-                <option value="L">L</option>
-                <option value="XL">XL</option>
-                <option value="2XL">2XL</option>
-                <option value="3XL">3XL</option>
-                <option value="4XL">4XL</option>
-                <option value="A0">A0</option>
-                <option value="A1">A1</option>
-                <option value="A2">A2</option>
-                <option value="A3">A3</option>
-                <option value="A4">A4</option>
-                <option value="A5">A5</option>
-                <option value="B1">B1</option>
-                <option value="B2">B2</option>
-                <option value="B3">B3</option>
-                <option value="B4">B4</option>
-                <option value="B5">B5</option>
+                <option v-for="(item, index) in unitOptions" :key="index" value="item.value">
+                  {{ item.text }}
+                </option>
               </select>
             </div>
           </div>
@@ -279,24 +267,29 @@
           <div class="flex">
             <select
               v-model="input.store"
-              class="h-10 w-2/4 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              class="h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
             >
               <option value="" selected disabled>購買處</option>
-              <option value="1">全聯</option>
-              <option value="2">家樂福</option>
+              <option v-for="item in channels" :key="item" :value="item.id">
+                {{ item.shortname }}
+              </option>
             </select>
             <input
               :ref="form['price']"
               v-model="input.price"
               type="number"
               step="0.1"
-              class="h-10 w-1/4 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              :class="{
+                'h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                'border-red-400 focus:border-red-400': isVerify && focusPrice,
+              }"
               placeholder="單件金額"
-              @input="verifyInput()"
+              @input="verifyInput"
             />
             <select
               v-model="input.discount"
-              class="h-10 w-1/4 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              aria-label="discount"
+              class="h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
             >
               <option selected disabled>優惠？</option>
               <option value="0">日常價</option>
@@ -306,6 +299,7 @@
           <div class="flex">
             <input
               v-model="input.date"
+              aria-label="date"
               type="date"
               class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
             />
@@ -316,13 +310,13 @@
     <div class="w-full border-t p-2">
       <button
         class="rounded py-1 px-2 mb-2 text-white bg-zinc-500 hover:bg-zinc-600 w-fit inline-block float-left"
-        @click="closeModal()"
+        @click="closeModal"
       >
         Cancel
       </button>
       <button
         class="rounded py-1 px-2 mb-2 text-white bg-sky-500 hover:bg-sky-600 w-fit inline-block ml-2 float-right"
-        @click="saveProduct()"
+        @click="saveProduct"
       >
         OK
       </button>
@@ -350,6 +344,40 @@ export default {
     const isSortOpen = ref(false);
     const sortSelector = ref(null);
     const sortOption = ref(null);
+    // unit options
+    const unitOptions = ref([
+      { text: '其他單位', value: '單位' },
+      { text: 'g/克', value: 'g' },
+      { text: 'ml/毫升', value: 'ml' },
+      { text: 'L/公升', value: 'liter' },
+      { text: 'cm/公分', value: 'cm' },
+      { text: 'm/公尺', value: 'm' },
+      { text: 'inch/英吋', value: 'inch' },
+      { text: 'EU/歐碼', value: 'EU' },
+      { text: 'UK/英國碼', value: 'UK' },
+      { text: 'US/美國碼', value: 'US' },
+      { text: 'S', value: 'S' },
+      { text: 'M', value: 'M' },
+      { text: 'L', value: 'L' },
+      { text: 'XL', value: 'XL' },
+      { text: '2XL', value: '2XL' },
+      { text: '3XL', value: '3XL' },
+      { text: '4XL', value: '4XL' },
+      { text: 'A0', value: 'A0' },
+      { text: 'A1', value: 'A1' },
+      { text: 'A2', value: 'A2' },
+      { text: 'A3', value: 'A3' },
+      { text: 'A4', value: 'A4' },
+      { text: 'A5', value: 'A5' },
+      { text: 'B1', value: 'B1' },
+      { text: 'B2', value: 'B2' },
+      { text: 'B3', value: 'B3' },
+      { text: 'B4', value: 'B4' },
+      { text: 'B5', value: 'B5' },
+    ]);
+    // channel options
+    const channels = ref(null);
+
     // new a product
     const photoCanvas = ref(null);
     const products = ref(null);
@@ -360,16 +388,21 @@ export default {
     const fileInput = ref();
     const fileInfo = ref('');
     const tempImg = ref(null);
+    const dataBase64URL = ref(null);
+    const isVerify = ref(false);
+    const focusName = ref(false);
+    const focusBrand = ref(false);
+    const focusPrice = ref(false);
     const input = {
-      img: null,
-      name: null,
-      brand: null,
-      capacity: null,
+      img: '',
+      name: '',
+      brand: '',
+      capacity: '',
       unit: '',
       store: '',
       price: null,
-      discount: null,
-      date: '2022-06-22',
+      discount: 0,
+      date: '',
     };
     const form = {
       name: ref(null),
@@ -384,8 +417,11 @@ export default {
 
     // sort options
     const openSortOption = () => {
-      if (!isSortOpen.value) isSortOpen.value = true; // open sort menu
-      else isSortOpen.value = false; // close sort menu
+      if (!isSortOpen.value) {
+        isSortOpen.value = true; // open sort menu
+      } else {
+        isSortOpen.value = false; // close sort menu
+      }
     };
 
     const setSortOption = (e) => {
@@ -403,16 +439,32 @@ export default {
         .then((response) => {
           // console.log('goSearch GET response', response);
           products.value = response.data.map((item) => {
-            const temp = item;
-            if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
-            else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
+            const parseText = (value) => {
+              if (value === '1') return '全聯';
+              if (value === '2') return '家樂福';
+              return '其他';
+            };
 
-            return temp;
+            return {
+              ...item,
+              sales_channel_text: parseText(item.sales_channel),
+            };
           });
         })
         .catch((error) => {
           console.error(error);
         });
+    };
+
+    // channel opstions
+    const getChannelList = () => {
+      axios
+        .get('/api/GET/channels')
+        .then((res) => {
+          // console.log(res);
+          channels.value = res.data;
+        })
+        .catch((error) => console.log(error));
     };
 
     // product list
@@ -422,11 +474,16 @@ export default {
         .then((response) => {
           // console.log('GET response', response);
           products.value = response.data.map((item) => {
-            const temp = item;
-            if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
-            else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
+            const parseText = (value) => {
+              if (value === '1') return '全聯';
+              if (value === '2') return '家樂福';
+              return '其他';
+            };
 
-            return temp;
+            return {
+              ...item,
+              sales_channel_text: parseText(item.sales_channel),
+            };
           });
         })
         .catch((error) => {
@@ -492,33 +549,37 @@ export default {
       getImage(imgSrc).then((img) => {
         // console.log('img', img);
         ctx.drawImage(img, 0, 0, 500, 500);
-        const dataBase64URL = getCanvas.toDataURL();
+        dataBase64URL.value = getCanvas.toDataURL();
 
-        input.img = dataBase64URL;
-        tempImg.value.innerHTML = `<img src='${dataBase64URL}' width='100%'>`;
-        // console.log(dataBase64URL);
+        input.img = dataBase64URL.value;
+        // console.log(dataBase64URL.value);
       });
     };
 
-    const focusInput = (field) => {
-      form[field].value.classList.add('border-red-400', 'focus:border-red-400');
-
-      return false;
-    };
-
-    const restoreInput = (field) => {
-      form[field].value.classList.remove('border-red-400', 'focus:border-red-400');
+    const restoreInput = () => {
+      focusName.value = false;
+      focusBrand.value = false;
+      focusPrice.value = false;
     };
 
     const verifyInput = () => {
-      restoreInput('name');
-      restoreInput('brand');
-      restoreInput('price');
+      isVerify.value = true;
+      restoreInput();
 
-      if (!input.name) return focusInput('name');
-      if (!input.brand) return focusInput('brand');
-      if (!input.price) return focusInput('price');
+      if (!input.name) {
+        focusName.value = true;
+        return false;
+      }
+      if (!input.brand) {
+        focusBrand.value = true;
+        return false;
+      }
+      if (!input.price) {
+        focusPrice.value = true;
+        return false;
+      }
 
+      isVerify.value = false;
       return true;
     };
 
@@ -599,11 +660,16 @@ export default {
         .then((response) => {
           // console.log('goSearch GET response', response);
           products.value = response.data.map((item) => {
-            const temp = item;
-            if (item.sales_channel === '1') temp.sales_channel_text = '全聯';
-            else if (item.sales_channel === '2') temp.sales_channel_text = '家樂福';
+            const parseText = (value) => {
+              if (value === '1') return '全聯';
+              if (value === '2') return '家樂福';
+              return '其他';
+            };
 
-            return temp;
+            return {
+              ...item,
+              sales_channel_text: parseText(item.sales_channel),
+            };
           });
         })
         .catch((error) => {
@@ -614,6 +680,7 @@ export default {
     // life-cycle
     onMounted(() => {
       getProductList();
+      getChannelList();
     });
 
     return {
@@ -624,6 +691,13 @@ export default {
       openSortOption,
       setSortOption,
       sortProductList,
+
+      // unit options
+      unitOptions,
+
+      // channel options
+      channels,
+      getChannelList,
 
       // new a product
       products,
@@ -655,6 +729,11 @@ export default {
       // form
       form,
       verifyInput,
+      dataBase64URL,
+      isVerify,
+      focusName,
+      focusBrand,
+      focusPrice,
     };
   },
 };

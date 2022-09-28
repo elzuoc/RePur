@@ -1,13 +1,13 @@
 <template>
   <div class="container mx-auto px-4">
     <!-- <div class="w-full border border-solid border-slate-300 text-slate-300 rounded bg-white">
-      <input
-        type="text"
-        class="w-[calc(100%-24px)] inline-block focus:outline-none focus:border focus-visible:border-solid focus:border-slate-400 rounded p-1"
-        placeholder="Search..."
-      />
-      <a href="#"><img src="@/assets/icons/search.svg" class="w-6 inline-block" /></a>
-    </div> -->
+    <input
+      type="text"
+      class="w-[calc(100%-24px)] inline-block focus:outline-none focus:border focus-visible:border-solid focus:border-slate-400 rounded p-1"
+      placeholder="Search..."
+    />
+    <a href="#"><img src="@/assets/icons/search.svg" class="w-6 inline-block" /></a>
+  </div> -->
 
     <div>
       <div class="mt-4 py-4 border-b-2 border-zinc-200 border-dashed w-full">
@@ -17,9 +17,12 @@
               :ref="formRefs['addFullName']"
               v-model="input.addFullName"
               type="text"
-              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              :class="{
+                'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                'border-red-400 focus:border-red-400': isVerify && focusFullName,
+              }"
               placeholder="全名"
-              @input="verifyAddInput()"
+              @input="verifyAddInput"
             />
           </div>
           <div class="flex">
@@ -28,9 +31,12 @@
                 :ref="formRefs['addShortName']"
                 v-model="input.addShortName"
                 type="text"
-                class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+                :class="{
+                  'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                  'border-red-400 focus:border-red-400': isVerify && focusShortName,
+                }"
                 placeholder="簡稱"
-                @input="verifyAddInput()"
+                @input="verifyAddInput"
               />
             </div>
           </div>
@@ -38,7 +44,7 @@
             <button
               type="button"
               class="border w-full bg-emerald-500 text-white rounded"
-              @click="createChannel()"
+              @click="createChannel"
             >
               新增
             </button>
@@ -59,7 +65,7 @@
           'bg-red-100': isDeleteSts,
         }"
       >
-        <div class="flex col-span-3" @click="changeStatus()">
+        <div class="flex col-span-3" @click="changeStatus">
           <div class="flex grid gap-1 text-left">
             <div class="flex h-5 overflow-hidden">
               <span class="font-bold truncate">{{ item.fullname }}</span>
@@ -104,13 +110,13 @@
     <div class="w-full border-t p-2">
       <button
         class="rounded py-1 px-2 text-white bg-zinc-500 hover:bg-zinc-600 w-fit inline-block float-left"
-        @click="closeModal()"
+        @click="closeModal"
       >
         Cancel
       </button>
       <button
         class="rounded py-1 px-2 text-white bg-sky-500 hover:bg-sky-600 w-fit inline-block ml-2 float-right"
-        @click="delChannel()"
+        @click="delChannel"
       >
         OK
       </button>
@@ -130,9 +136,12 @@
             :ref="formRefs['editFullName']"
             v-model="input.editFullName"
             type="text"
-            class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+            :class="{
+              'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+              'border-red-400 focus:border-red-400': isVerify && focusEditFullName,
+            }"
             placeholder="全名"
-            @input="verifyInput()"
+            @input="verifyInput"
           />
         </div>
         <div class="flex">
@@ -140,9 +149,12 @@
             :ref="formRefs['editShortName']"
             v-model="input.editShortName"
             type="text"
-            class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+            :class="{
+              'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+              'border-red-400 focus:border-red-400': isVerify && focusEditShortName,
+            }"
             placeholder="簡稱"
-            @input="verifyInput()"
+            @input="verifyInput"
           />
         </div>
       </div>
@@ -150,20 +162,19 @@
     <div class="w-full border-t p-2">
       <button
         class="rounded py-1 px-2 mb-2 text-white bg-zinc-500 hover:bg-zinc-600 w-fit inline-block float-left"
-        @click="closeEditModal()"
+        @click="closeEditModal"
       >
         Cancel
       </button>
       <button
         class="rounded py-1 px-2 mb-2 text-white bg-sky-500 hover:bg-sky-600 w-fit inline-block ml-2 float-right"
-        @click="editChannel()"
+        @click="editChannel"
       >
         OK
       </button>
     </div>
   </div>
 </template>
-
 <script>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
@@ -183,6 +194,11 @@ export default {
     const isModalOpen = ref(false);
     const isModalClose = ref(true);
     const channels = ref(null);
+    const isVerify = ref(false);
+    const focusFullName = ref(false);
+    const focusShortName = ref(false);
+    const focusEditFullName = ref(false);
+    const focusEditShortName = ref(false);
     const formRefs = {
       // new
       addFullName: ref(null),
@@ -193,15 +209,15 @@ export default {
     };
     const input = {
       // new
-      addFullName: null,
-      addShortName: null,
+      addFullName: '',
+      addShortName: '',
       // edit
-      editId: null,
-      editFullName: null,
-      editShortName: null,
+      editId: 0,
+      editFullName: '',
+      editShortName: '',
       // delete
-      delId: null,
-      delFullName: null,
+      delId: 0,
+      delFullName: '',
     };
 
     // edit
@@ -218,24 +234,31 @@ export default {
         .catch((error) => console.log(error));
     };
 
-    const focusInput = (field) => {
-      formRefs[field].value.classList.add('border-red-400', 'focus:border-red-400');
-
-      return false;
-    };
-
-    const restoreInput = (field) => {
-      formRefs[field].value.classList.remove('border-red-400', 'focus:border-red-400');
+    const restoreInput = (behavior) => {
+      if (behavior === 'add') {
+        focusFullName.value = false;
+        focusShortName.value = false;
+      } else if (behavior === 'edit') {
+        focusEditFullName.value = false;
+        focusEditShortName.value = false;
+      }
     };
 
     // create form
     const verifyAddInput = () => {
-      restoreInput('addFullName');
-      restoreInput('addShortName');
+      isVerify.value = true;
+      restoreInput('add');
 
-      if (!input.addFullName) return focusInput('addFullName');
-      if (!input.addShortName) return focusInput('addShortName');
+      if (!input.addFullName) {
+        focusFullName.value = true;
+        return false;
+      }
+      if (!input.addShortName) {
+        focusShortName.value = true;
+        return false;
+      }
 
+      isVerify.value = false;
       return true;
     };
 
@@ -255,12 +278,19 @@ export default {
 
     // edit form
     const verifyInput = () => {
-      restoreInput('editFullName');
-      restoreInput('editShortName');
+      isVerify.value = true;
+      restoreInput('edit');
 
-      if (!input.editFullName) return focusInput('editFullName');
-      if (!input.editShortName) return focusInput('editShortName');
+      if (!input.editFullName) {
+        focusEditFullName.value = true;
+        return false;
+      }
+      if (!input.editShortName) {
+        focusEditShortName.value = true;
+        return false;
+      }
 
+      isVerify.value = false;
       return true;
     };
 
@@ -359,6 +389,11 @@ export default {
       verifyInput,
       verifyAddInput,
       editChannel,
+      isVerify,
+      focusFullName,
+      focusShortName,
+      focusEditFullName,
+      focusEditShortName,
       // del
       delChannel,
     };

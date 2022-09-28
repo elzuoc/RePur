@@ -45,8 +45,11 @@
               :ref="form['date']"
               v-model="input.date"
               type="date"
-              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
-              @input="verifyInput()"
+              :class="{
+                'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                'border-red-400 focus:border-red-400': isVerify && focusDate,
+              }"
+              @input="verifyInput"
             />
           </div>
           <div class="flex">
@@ -54,17 +57,23 @@
               :ref="form['price']"
               v-model="input.price"
               type="number"
-              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              :class="{
+                'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                'border-red-400 focus:border-red-400': isVerify && focusPrice,
+              }"
               placeholder="平均單件價格"
-              @input="verifyInput()"
+              @input="verifyInput"
             />
           </div>
           <div class="flex">
             <select
               :ref="form['discount']"
               v-model="input.discount"
-              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
-              @change="verifyInput()"
+              :class="{
+                'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                'border-red-400 focus:border-red-400': isVerify && focusDiscount,
+              }"
+              @change="verifyInput"
             >
               <option value="" disabled>價格類型...</option>
               <option value="1">特惠活動價</option>
@@ -75,8 +84,11 @@
             <select
               :ref="form['channel']"
               v-model="input.channel"
-              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
-              @change="verifyInput()"
+              :class="{
+                'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                'border-red-400 focus:border-red-400': isVerify && focusChannel,
+              }"
+              @change="verifyInput"
             >
               <option value="" disabled>購物管道...</option>
               <option v-for="item in channels" :key="item" :value="item.id">
@@ -88,7 +100,7 @@
             <button
               type="button"
               class="border w-full bg-emerald-500 text-white rounded"
-              @click="insertSubProduct()"
+              @click="insertSubProduct"
             >
               新增
             </button>
@@ -146,7 +158,6 @@
     </div>
   </div>
 </template>
-
 <script>
 // import { ref } from 'vue';
 import { ref, onMounted } from 'vue';
@@ -167,6 +178,11 @@ export default {
     const mainInfo = ref({});
     const subProductList = ref(null);
     const channels = ref(null);
+    const isVerify = ref(false);
+    const focusDate = ref(false);
+    const focusPrice = ref(false);
+    const focusDiscount = ref(false);
+    const focusChannel = ref(false);
     const form = {
       date: ref(null),
       price: ref(null),
@@ -174,9 +190,9 @@ export default {
       channel: ref(null),
     };
     const input = {
-      date: null,
+      date: '',
       price: null,
-      discount: '',
+      discount: 0,
       channel: '',
     };
     const originMaxMin = {
@@ -199,9 +215,9 @@ export default {
         .get(`/api/GET/product/${mainId}`)
         .then((response) => {
           // console.log(response.data);
-          const resData = response.data;
-          mainInfo.value = resData;
-          parseChannel(resData.sales_channel);
+          const { data } = response; // 解構
+          mainInfo.value = data;
+          parseChannel(data.sales_channel);
         })
         .catch((error) => console.log(error));
     };
@@ -226,25 +242,34 @@ export default {
         .catch((error) => console.log(error));
     };
 
-    const focusInput = (field) => {
-      form[field].value.classList.add('border-red-400', 'focus:border-red-400');
-
-      return false;
-    };
-    const restoreInput = (field) => {
-      form[field].value.classList.remove('border-red-400', 'focus:border-red-400');
+    const restoreInput = () => {
+      focusDate.value = false;
+      focusPrice.value = false;
+      focusDiscount.value = false;
+      focusChannel.value = false;
     };
     const verifyInput = () => {
-      restoreInput('date');
-      restoreInput('price');
-      restoreInput('discount');
-      restoreInput('channel');
+      isVerify.value = true;
+      restoreInput();
 
-      if (!input.date) return focusInput('date');
-      if (!input.price) return focusInput('price');
-      if (!input.discount) return focusInput('discount');
-      if (!input.channel) return focusInput('channel');
+      if (!input.date) {
+        focusDate.value = true;
+        return false;
+      }
+      if (!input.price) {
+        focusPrice.value = true;
+        return false;
+      }
+      if (!input.discount) {
+        focusDiscount.value = true;
+        return false;
+      }
+      if (!input.channel) {
+        focusChannel.value = true;
+        return false;
+      }
 
+      isVerify.value = false;
       return true;
     };
     const initInputParams = () => {
@@ -345,9 +370,9 @@ export default {
 
     // life cycle
     onMounted(() => {
-      const { id } = route.params;
+      const { id } = route.query;
       mainId = id;
-      // console.log(mainId);
+      // console.log(route.query);
       getMainProductInfo();
       getSubProductList();
       getChannelList();
@@ -362,8 +387,15 @@ export default {
       input,
       channels,
       getChannelList,
+
+      // form
       form,
       verifyInput,
+      isVerify,
+      focusDate,
+      focusPrice,
+      focusDiscount,
+      focusChannel,
     };
   },
 };
