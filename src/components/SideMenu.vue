@@ -35,7 +35,7 @@
     <div
       class="h5 leading-tight ml-2 mt-3 whitespace-normal text-zinc-400 hover:text-zinc-600 cursor-pointer"
     >
-      <router-link to="/" @click="closeSideMenu()">慣購清單</router-link>
+      <router-link to="/" @click="closeSideMenu()">常購商品</router-link>
     </div>
     <!-- <div
       class="h5 leading-tight ml-2 mt-3 whitespace-normal text-zinc-400 hover:text-zinc-600 cursor-pointer"

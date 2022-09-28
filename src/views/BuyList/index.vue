@@ -46,7 +46,7 @@
         @click="openNewItemModal"
       >
         <div class="absolute m-auto inset-0 w-fit h-fit">
-          <span class="text-white font-bold tracking-wider">+ 慣購商品</span>
+          <span class="text-white font-bold tracking-wider">+ 常購商品</span>
         </div>
       </div>
     </div>
@@ -178,7 +178,7 @@
     class="fixed m-auto left-0 right-0 top-0 bottom-0 z-20 w-11/12 md:w-8/12 lg:w-5/12 h-fit bg-white rounded border border-zinc-200 hidden transition-all duration-300 ease-in"
     :class="{ 'opacity-0': isModalClose, 'opacity-100': isModalOpen }"
   >
-    <div class="w-full border-b p-2 font-bold text-left">新增慣購商品</div>
+    <div class="w-full border-b p-2 font-bold text-left">新增常購商品</div>
     <div class="w-full min-h-[50px] p-2">
       <div class="grid grid-cols-3 gap-2">
         <div class="flex">

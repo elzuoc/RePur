@@ -68,7 +68,7 @@ export default {
           pageTitle.value = '匯出商品紀錄';
           break;
         default:
-          pageTitle.value = '慣購清單';
+          pageTitle.value = '常購商品';
           break;
       }
     });
