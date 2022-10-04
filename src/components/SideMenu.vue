@@ -56,39 +56,24 @@
   </div>
 </template>
 
-<script>
+<script setup>
 import { ref } from 'vue';
 
-export default {
-  name: 'SideMenu',
-  setup() {
-    const isMenuToggleOn = ref(false);
-    const isMaskOn = ref(false);
+const isMenuToggleOn = ref(false);
+const isMaskOn = ref(false);
 
-    const menuToggle = () => {
-      if (isMenuToggleOn.value === false) {
-        isMaskOn.value = true;
-        isMenuToggleOn.value = true;
-      } else {
-        isMaskOn.value = false;
-        isMenuToggleOn.value = false;
-      }
-    };
+const menuToggle = () => {
+  if (isMenuToggleOn.value === false) {
+    isMaskOn.value = true;
+    isMenuToggleOn.value = true;
+  } else {
+    isMaskOn.value = false;
+    isMenuToggleOn.value = false;
+  }
+};
 
-    const closeSideMenu = () => {
-      isMaskOn.value = false;
-      isMenuToggleOn.value = false;
-    };
-
-    return {
-      // params
-      isMenuToggleOn,
-      isMaskOn,
-
-      // methods
-      menuToggle,
-      closeSideMenu,
-    };
-  },
+const closeSideMenu = () => {
+  isMaskOn.value = false;
+  isMenuToggleOn.value = false;
 };
 </script>
