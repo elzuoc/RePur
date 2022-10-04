@@ -141,8 +141,8 @@ const getProductList = () => {
       // console.log('GET response', response);
       products.value = response.data.map((item) => {
         const parseText = (value) => {
-          if (value === '1') return '全聯';
-          if (value === '2') return '家樂福';
+          const findChannel = channels.value.find((channel) => channel.id === value);
+          if (findChannel) return findChannel.shortname;
           return '其他';
         };
 
@@ -336,8 +336,9 @@ const goSearch = () => {
       // console.log('goSearch GET response', response);
       products.value = response.data.map((item) => {
         const parseText = (value) => {
-          if (value === '1') return '全聯';
-          if (value === '2') return '家樂福';
+          const findChannel = channels.value.find((channel) => channel.id === value);
+          if (findChannel) return findChannel.shortname;
+
           return '其他';
         };
 
@@ -354,8 +355,8 @@ const goSearch = () => {
 
 // life-cycle
 onMounted(() => {
-  getProductList();
   getChannelList();
+  getProductList();
 });
 </script>
 
