@@ -7,10 +7,10 @@ import { useRoute } from 'vue-router';
 import axios from 'axios';
 
 const route = useRoute();
-let mainId = null;
+let mainId = 0;
 const mainInfo = ref({});
-const subProductList = ref(null);
-const channels = ref(null);
+const subProductList = ref([]);
+const channels = ref([]);
 const isVerify = ref(false);
 const focusDate = ref(false);
 const focusPrice = ref(false);
@@ -30,8 +30,8 @@ const input = {
   channel: '',
 };
 const originMaxMin = {
-  max: null,
-  min: null,
+  max: {},
+  min: {},
 };
 
 const parseChannel = (channelId) => {

@@ -43,19 +43,19 @@ const unitOptions = ref([
 ]);
 
 // channel options
-const channels = ref(null);
+const channels = ref([]);
 
 // new a product
 const photoCanvas = ref(null);
-const products = ref(null);
+const products = ref([]);
 const modal = ref(null);
 const modalMask = ref(null);
 const isModalOpen = ref(false);
 const isModalClose = ref(true);
-const fileInput = ref();
+const fileInput = ref('');
 const fileInfo = ref('');
 const tempImg = ref(null); // eslint-disable-line no-unused-vars
-const dataBase64URL = ref(null);
+const dataBase64URL = ref('');
 const isVerify = ref(false);
 const focus = ref({
   name: false,
@@ -75,9 +75,9 @@ const input = {
 };
 
 // search
-const search = ref(null);
+const search = ref('');
 const searchSuggest = ref(null);
-const searchOptions = ref(null);
+const searchOptions = ref([]);
 
 // sort options
 // eslint-disable-next-line no-unused-vars
@@ -106,8 +106,8 @@ const sortProductList = (params) => {
       // console.log('goSearch GET response', response);
       products.value = response.data.map((item) => {
         const parseText = (value) => {
-          if (value === '1') return '全聯';
-          if (value === '2') return '家樂福';
+          const findChannel = channels.value.find((channel) => channel.id === value);
+          if (findChannel) return findChannel.shortname;
           return '其他';
         };
 

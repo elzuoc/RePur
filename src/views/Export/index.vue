@@ -2,26 +2,23 @@
 
 <script setup>
 import axios from 'axios';
-// import { ref } from 'vue';
+import { ref, onMounted } from 'vue';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
 
-// const photoCanvas = ref(null);
+// channel options
+const channels = ref([]);
 
-// const newImg = (src) => {
-//   return new Promise((resolve, reject) => {
-//     const img = new Image(50, 50);
-//     img.onload = () => resolve(img);
-//     img.onerror = () => reject(new Error('加載失敗'));
-//     img.src = src;
-//     img.crossOrigin = 'anonymous';
-//   });
-// };
-
-// const getImage = async (src) => {
-//   const img = await newImg(src);
-//   return img;
-// };
+// channel opstions
+const getChannelList = () => {
+  axios
+    .get('/api/GET/channels')
+    .then((res) => {
+      // console.log(res);
+      channels.value = res.data;
+    })
+    .catch((error) => console.log(error));
+};
 
 const exportExcel = async (dataList) => {
   const workbook = new ExcelJS.Workbook();
@@ -54,12 +51,7 @@ const exportExcel = async (dataList) => {
       horizontal: 'center',
     };
   });
-  // const dataList = dataList;
-  // const dataList = [
-  //   { id: 1, name: 'John Doe', img: 'lemon.jpg' },
-  //   { id: 2, name: 'Jane Doe', img: 'pickle.jpg' }
-  // ];
-  // console.log('dataList', dataList);
+
   for (let i = 0; i < dataList.length; i += 1) {
     worksheet.addRow({ id: dataList[i].id, name: dataList[i].name });
 
@@ -75,18 +67,21 @@ const exportExcel = async (dataList) => {
 
     const base64url = `${dataList[i].img}`;
     // console.log('base64url', base64url);
-    const imageId = workbook.addImage({
-      base64: base64url,
-      extension: 'jpg',
-    });
-    worksheet.addImage(imageId, {
-      tl: { col: 2, row: i + 1 },
-      ext: { width: 50, height: 50 },
-      hyperlinks: {
-        hyperlink: 'https://www.google.com.tw/',
-        tooltip: 'https://www.google.com.tw/',
-      },
-    });
+    if (base64url !== '') {
+      const imageId = workbook.addImage({
+        base64: base64url,
+        extension: 'jpg',
+      });
+      worksheet.addImage(imageId, {
+        tl: { col: 2, row: i + 1 },
+        ext: { width: 50, height: 50 },
+        hyperlinks: {
+          hyperlink: 'https://www.google.com.tw/',
+          tooltip: 'https://www.google.com.tw/',
+        },
+      });
+    }
+
     if (i === dataList.length - 1) {
       const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
       const downloadDate = new Date().toISOString().substring(0, 10).replaceAll('-', '');
@@ -96,48 +91,6 @@ const exportExcel = async (dataList) => {
         saveAs(blob, filename);
       });
     }
-
-    // const getCanvas = photoCanvas.value;
-    // const ctx = getCanvas.getContext('2d');
-    // const imgSrc = `https://raw.githubusercontent.com/elzuoc/RePur/main/src/assets/uploads/${dataList[i].img}`;
-    // console.log('imgSrc', imgSrc);
-    // getImage(imgSrc)
-    //   .then((img) => {
-    //     console.log('img', img);
-    //     ctx.drawImage(img, 0, 0, 50, 50);
-    //     const dataBase64URL = getCanvas.toDataURL();
-
-    //     return dataBase64URL;
-    //   })
-    //   .then((base64url) => {
-    //     console.log('base64url', base64url);
-    //     const imageId = workbook.addImage({
-    //       base64: base64url,
-    //       extension: 'jpg',
-    //     });
-
-    //     console.log('imageId', imageId);
-    //     // worksheet.addImage(imageId, `C${i + 2}:C${i + 2}`);
-    //     worksheet.addImage(imageId, {
-    //       tl: { col: 2, row: i + 1 },
-    //       ext: { width: 50, height: 50 },
-    //       hyperlinks: {
-    //         hyperlink: 'https://www.google.com.tw/',
-    //         tooltip: 'https://www.google.com.tw/',
-    //       },
-    //     });
-    //   })
-    //   .then(() => {
-    //     if (i === dataList.length - 1) {
-    //       const fileType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
-    //       const downloadDate = new Date().toISOString().substring(0, 10).replaceAll('-', '');
-    //       const filename = `${downloadDate}下載_RePur_商品紀錄.xlsx`;
-    //       workbook.xlsx.writeBuffer().then((data) => {
-    //         const blob = new Blob([data], { type: fileType });
-    //         saveAs(blob, filename);
-    //       });
-    //     }
-    //   });
   }
 };
 
@@ -173,6 +126,11 @@ const getProductList = () => {
       console.error(error);
     });
 };
+
+// life-cycle
+onMounted(() => {
+  getChannelList();
+});
 </script>
 
 <style scoped>
