@@ -5,7 +5,7 @@ import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import ApiErrorMsg from '../../components/ApiErrorMsg.vue'; // eslint-disable-line no-unused-vars
+import ApiErrorMsg from '../../components/ApiErrorMsg.vue';
 
 const channelOptions = ref([]);
 
