@@ -314,7 +314,7 @@ const saveProduct = () => {
       showApiErrorMsg(error);
     });
 };
-sv.
+
 // search
 // eslint-disable-next-line no-unused-vars
 const initSearchInput = () => {
@@ -395,7 +395,7 @@ onMounted(() => {
 
 <script>
 export default {
-  name: 'BuyList'
+  name: 'BuyList',
 };
 </script>
 
