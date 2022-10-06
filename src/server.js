@@ -1,19 +1,17 @@
-import { createServer, Model } from 'miragejs';
+import { createServer } from 'miragejs';
 
 export default function makeServer({ environment = 'development' } = {}) {
-  let server = createServer();
-
-  server = createServer({
+  const CreateServer = createServer({
     environment,
     seeds(server) {
-      server.db; // {} the db is empty
+      const serverDB = server.db; // {} the db is empty
       const dbData = localStorage.getItem('db');
 
       if (dbData) {
         // https://miragejs.com/api/classes/db/#load-data
-        server.db.loadData(JSON.parse(dbData));
+        serverDB.loadData(JSON.parse(dbData));
       } else {
-        server.db.loadData({
+        serverDB.loadData({
           products: [
             {
               id: 1,
@@ -29,7 +27,7 @@ export default function makeServer({ environment = 'development' } = {}) {
               weight: '600',
               unit: 'g',
               sales_channel: '1',
-              discount: '0',
+              discount: '2',
               buy_date: '2022-06-22',
             },
             {
@@ -227,16 +225,15 @@ export default function makeServer({ environment = 'development' } = {}) {
       this.delete('/api/DELETE/channels/:id', (schema, request) => {
         const { id } = request.params;
         return schema.db.channels.remove(id);
-        // return schema.db.channels.find(Number(id));
       });
     },
   });
 
-  server.pretender.handledRequest = (verb) => {
+  CreateServer.pretender.handledRequest = (verb) => {
     if (verb.toLowerCase() !== 'get' && verb.toLowerCase() !== 'head') {
-      localStorage.setItem('db', JSON.stringify(server.db.dump()));
+      localStorage.setItem('db', JSON.stringify(CreateServer.db.dump()));
     }
   };
 
-  return server;
+  return CreateServer;
 }

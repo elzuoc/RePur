@@ -3,13 +3,16 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import SuccessMsg from '../../components/SuccessMsg.vue'; // eslint-disable-line no-unused-vars
+import FailedMsg from '../../components/FailedMsg.vue'; // eslint-disable-line no-unused-vars
+import ApiErrorMsg from '../../components/ApiErrorMsg.vue'; // eslint-disable-line no-unused-vars
 
 const isDeleteSts = ref(false);
 const modal = ref(null);
 const modalMask = ref(null);
 const isModalOpen = ref(false);
 const isModalClose = ref(true);
-const channels = ref([]);
+const channelList = ref([]);
 const isVerify = ref(false);
 const focusFullName = ref(false);
 const focusShortName = ref(false);
@@ -17,22 +20,20 @@ const focusEditFullName = ref(false);
 const focusEditShortName = ref(false);
 // eslint-disable-next-line no-unused-vars
 const formRefs = ref({
-  // new
   addFullName: null,
   addShortName: null,
-  // edit
+
   editFullName: null,
   editShortName: null,
 });
 const input = {
-  // new
   addFullName: '',
   addShortName: '',
-  // edit
+
   editId: 0,
   editFullName: '',
   editShortName: '',
-  // delete
+
   delId: 0,
   delFullName: '',
 };
@@ -41,21 +42,48 @@ const input = {
 const editModal = ref(null);
 const isEditModalOpen = ref(false);
 
-const getChannelList = () => {
+// msg
+const isSuccessMsg = ref(false);
+const isFailedMsg = ref(false);
+const isApiErrorMsg = ref(false);
+
+const showApiErrorMsg = (error) => {
+  isApiErrorMsg.value = true;
+  setTimeout(() => {
+    isApiErrorMsg.value = false;
+  }, 3000);
+
+  console.log(error);
+};
+const showSuccessMsg = () => {
+  isSuccessMsg.value = true;
+  setTimeout(() => {
+    isSuccessMsg.value = false;
+  }, 3000);
+};
+const showFailedMsg = () => {
+  isFailedMsg.value = true;
+  setTimeout(() => {
+    isFailedMsg.value = false;
+  }, 3000);
+};
+
+const getChannelList = async () => {
   axios
     .get('/api/GET/channels')
     .then((res) => {
       // console.log(res);
-      channels.value = res.data;
+      const { data } = res;
+      channelList.value = data;
     })
-    .catch((error) => console.log(error));
+    .catch((error) => showApiErrorMsg(error));
 };
 
 const restoreInput = (behavior) => {
   if (behavior === 'add') {
     focusFullName.value = false;
     focusShortName.value = false;
-  } else if (behavior === 'edit') {
+  } else {
     focusEditFullName.value = false;
     focusEditShortName.value = false;
   }
@@ -79,6 +107,11 @@ const verifyAddInput = () => {
   return true;
 };
 
+const initCreateParams = () => {
+  input.addFullName = '';
+  input.addShortName = '';
+};
+
 // eslint-disable-next-line no-unused-vars
 const createChannel = () => {
   if (!verifyAddInput()) return;
@@ -90,8 +123,19 @@ const createChannel = () => {
 
   axios
     .post(`/api/POST/channels`, params)
-    .then(() => getChannelList())
-    .catch((error) => console.log(error));
+    .then((response) => {
+      const { status } = response;
+
+      if (status === 201) {
+        getChannelList();
+        showSuccessMsg();
+      } else {
+        showFailedMsg();
+      }
+
+      initCreateParams();
+    })
+    .catch((error) => showApiErrorMsg(error));
 };
 
 // edit form
@@ -144,11 +188,21 @@ const editChannel = () => {
 
   axios
     .patch(`/api/PATCH/channels/${input.editId}`, params)
-    .then(() => {
-      getChannelList();
+    .then((response) => {
+      const { status } = response;
       closeEditModal();
+
+      if (status === 200) {
+        getChannelList();
+        showSuccessMsg();
+      } else {
+        showFailedMsg();
+      }
     })
-    .catch((error) => console.log(error));
+    .catch((error) => {
+      closeEditModal();
+      showApiErrorMsg(error);
+    });
 };
 
 // delete form
@@ -178,17 +232,33 @@ const delChannel = () => {
   axios
     .delete(`/api/DELETE/channels/${input.delId}`)
     .then((response) => {
-      console.log(response);
-      getChannelList();
+      // console.log(response);
+      const { status } = response;
       closeModal();
+
+      if (status === 201) {
+        getChannelList();
+        showSuccessMsg();
+      } else {
+        showFailedMsg();
+      }
     })
-    .catch((error) => console.log(error));
+    .catch((error) => {
+      closeModal();
+      showApiErrorMsg(error);
+    });
 };
 
 // life-cycle
 onMounted(() => {
   getChannelList();
 });
+</script>
+
+<script>
+export default {
+  name: 'SalesChannel',
+};
 </script>
 
 <style scoped>

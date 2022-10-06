@@ -20,7 +20,7 @@
         Search...
       </div>
       <img
-        src="@/assets/icons/search.svg"
+        src="@/assets/images/icons/search.svg"
         class="w-6 inline-block cursor-pointer"
         @click="goSearch"
       />
@@ -58,7 +58,7 @@
       class="w-fit h-10 p-2 border border-zinc-300 text-zinc-500 cursor-pointer"
       @click="openSortOption"
     >
-      <img src="@/assets/icons/sort-desc.svg" class="w-5 inline-block" />
+      <img src="@/assets/images/icons/sort-desc.svg" class="w-5 inline-block" />
       日期 新→舊
     </div>
     <div
@@ -70,7 +70,10 @@
         class="p-2 hover:bg-zinc-50 cursor-pointer"
         @click="sortProductList({ event: $event, field: 'buy_date', type: 'desc' })"
       >
-        <img src="@/assets/icons/sort-desc.svg" class="w-5 inline-block" />
+        <img
+          src="@/assets/images/icons/sort-desc.svg"
+          class="w-5 inline-block"
+        />
         日期 新→舊
         <div class="hidden">buy_date-desc</div>
       </div>
@@ -78,26 +81,29 @@
         class="p-2 hover:bg-zinc-50 cursor-pointer"
         @click="sortProductList({ event: $event, field: 'buy_date', type: 'asc' })"
       >
-        <img src="@/assets/icons/sort-asc.svg" class="w-5 inline-block" />
+        <img
+          src="@/assets/images/icons/sort-asc.svg"
+          class="w-5 inline-block"
+        />
         日期 舊→新
         <div class="hidden">buy_date-asc</div>
       </div>
       <!-- <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
-        <img src="@/assets/icons/sort-desc.svg" class="w-5 inline-block" />
+        <img src="@/assets/images/icons/sort-desc.svg" class="w-5 inline-block" />
         頻率 多→少
         <div class="hidden">times-desc</div>
       </div>
       <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
-        <img src="@/assets/icons/sort-asc.svg" class="w-5 inline-block" />
+        <img src="@/assets/images/icons/sort-asc.svg" class="w-5 inline-block" />
         頻率 少→多
         <div class="hidden">times-asc</div>
       </div>
       <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
-        <img src="@/assets/icons/view-list.svg" class="w-5 inline-block" />
+        <img src="@/assets/images/icons/view-list.svg" class="w-5 inline-block" />
         年度
       </div>
       <div class="p-2 hover:bg-zinc-50 cursor-pointer" @click="setSortOption($event)">
-        <img src="@/assets/icons/star.svg" class="w-5 inline-block" />
+        <img src="@/assets/images/icons/star.svg" class="w-5 inline-block" />
         品牌
       </div> -->
     </div>
@@ -286,7 +292,7 @@
             class="h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
           >
             <option value="" selected disabled>購買處</option>
-            <option v-for="item in channels" :key="item" :value="item.id">
+            <option v-for="item in channelOptions" :key="item" :value="item.id">
               {{ item.shortname }}
             </option>
           </select>
@@ -306,9 +312,9 @@
             aria-label="discount"
             class="h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
           >
-            <option selected disabled>優惠？</option>
-            <option value="0">日常價</option>
+            <option value="0" selected disabled>優惠？</option>
             <option value="1">活動優惠價</option>
+            <option value="2">日常價</option>
           </select>
         </div>
         <div class="flex">
@@ -339,3 +345,7 @@
 
   <canvas ref="photoCanvas" width="500" height="500" class="hidden"></canvas>
 </div>
+
+<SuccessMsg :isSuccessMsg="isSuccessMsg" />
+<FailedMsg :isFailedMsg="isFailedMsg" />
+<ApiErrorMsg :isApiErrorMsg="isApiErrorMsg" />

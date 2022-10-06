@@ -5,7 +5,7 @@
         <router-link to="/">
           <img
             class="block h-6 w-auto ml-2.5 text-black"
-            src="@/assets/img/logo_01.png"
+            src="@/assets/images/logo_01.png"
             alt="Workflow"
         /></router-link>
 
@@ -22,7 +22,7 @@
 <script setup>
 import { ref, onMounted, onBeforeMount } from 'vue';
 import { useRoute } from 'vue-router';
-import SideMenu from '../SideMenu.vue';
+import SideMenu from './SideMenu.vue';
 
 const route = useRoute();
 const pageTitle = ref(null);

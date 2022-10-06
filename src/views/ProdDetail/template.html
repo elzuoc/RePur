@@ -78,9 +78,9 @@
             }"
             @change="verifyInput"
           >
-            <option value="" disabled>價格類型...</option>
+            <option value="0" disabled>價格類型...</option>
             <option value="1">特惠活動價</option>
-            <option value="0">日常價</option>
+            <option value="2">日常價</option>
           </select>
         </div>
         <div class="flex">
@@ -94,7 +94,7 @@
             @change="verifyInput"
           >
             <option value="" disabled>購物管道...</option>
-            <option v-for="item in channels" :key="item" :value="item.id">
+            <option v-for="item in channelOptions" :key="item" :value="item.id">
               {{ item.shortname }}
             </option>
           </select>
@@ -162,3 +162,7 @@
     </div>
   </div>
 </div>
+
+<SuccessMsg :isSuccessMsg="isSuccessMsg" />
+<FailedMsg :isFailedMsg="isFailedMsg" />
+<ApiErrorMsg :isApiErrorMsg="isApiErrorMsg" />

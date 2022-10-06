@@ -5,19 +5,31 @@ import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
+import ApiErrorMsg from '../../components/ApiErrorMsg.vue'; // eslint-disable-line no-unused-vars
 
-// channel options
-const channels = ref([]);
+const channelOptions = ref([]);
 
-// channel opstions
-const getChannelList = () => {
+// msg
+const isApiErrorMsg = ref(false);
+
+const showApiErrorMsg = (error) => {
+  isApiErrorMsg.value = true;
+  setTimeout(() => {
+    isApiErrorMsg.value = false;
+  }, 3000);
+
+  console.log(error);
+};
+
+const getChannelOptions = () => {
   axios
     .get('/api/GET/channels')
     .then((res) => {
       // console.log(res);
-      channels.value = res.data;
+      const { data } = res;
+      channelOptions.value = data;
     })
-    .catch((error) => console.log(error));
+    .catch((error) => showApiErrorMsg(error));
 };
 
 const exportExcel = async (dataList) => {
@@ -55,9 +67,8 @@ const exportExcel = async (dataList) => {
   for (let i = 0; i < dataList.length; i += 1) {
     worksheet.addRow({ id: dataList[i].id, name: dataList[i].name });
 
-    // Alignment
     const rows = worksheet.getRow(i + 2);
-    rows.height = 50; // row height
+    rows.height = 50;
     columnIdx.forEach((col) => {
       rows.getCell(col).alignment = {
         vertical: 'middle',
@@ -102,8 +113,8 @@ const getProductList = () => {
       // console.log('GET response', response);
 
       const dataList = [];
-      // products.value = response.data.map((item) => {
-      response.data.map((item) => {
+      const { data } = response;
+      data.map((item) => {
         const obj = { id: item.id, name: item.name, img: item.pic };
         dataList.push(obj);
 
@@ -122,15 +133,19 @@ const getProductList = () => {
       return dataList;
     })
     .then((dataList) => exportExcel(dataList))
-    .catch((error) => {
-      console.error(error);
-    });
+    .catch((error) => showApiErrorMsg(error));
 };
 
 // life-cycle
 onMounted(() => {
-  getChannelList();
+  getChannelOptions();
 });
+</script>
+
+<script>
+export default {
+  name: 'ExportView',
+};
 </script>
 
 <style scoped>

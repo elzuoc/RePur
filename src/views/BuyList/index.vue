@@ -3,6 +3,9 @@
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
+import SuccessMsg from '../../components/SuccessMsg.vue'; // eslint-disable-line no-unused-vars
+import FailedMsg from '../../components/FailedMsg.vue'; // eslint-disable-line no-unused-vars
+import ApiErrorMsg from '../../components/ApiErrorMsg.vue'; // eslint-disable-line no-unused-vars
 
 // sort options
 const isSortOpen = ref(false);
@@ -42,8 +45,7 @@ const unitOptions = ref([
   { text: 'B5', value: 'B5' },
 ]);
 
-// channel options
-const channels = ref([]);
+const channelOptions = ref([]);
 
 // new a product
 const photoCanvas = ref(null);
@@ -79,13 +81,39 @@ const search = ref('');
 const searchSuggest = ref(null);
 const searchOptions = ref([]);
 
+// msg
+const isSuccessMsg = ref(false);
+const isFailedMsg = ref(false);
+const isApiErrorMsg = ref(false);
+
+const showApiErrorMsg = (error) => {
+  isApiErrorMsg.value = true;
+  setTimeout(() => {
+    isApiErrorMsg.value = false;
+  }, 3000);
+
+  console.log(error);
+};
+const showSuccessMsg = () => {
+  isSuccessMsg.value = true;
+  setTimeout(() => {
+    isSuccessMsg.value = false;
+  }, 3000);
+};
+const showFailedMsg = () => {
+  isFailedMsg.value = true;
+  setTimeout(() => {
+    isFailedMsg.value = false;
+  }, 3000);
+};
+
 // sort options
 // eslint-disable-next-line no-unused-vars
 const openSortOption = () => {
   if (!isSortOpen.value) {
-    isSortOpen.value = true; // open sort menu
+    isSortOpen.value = true;
   } else {
-    isSortOpen.value = false; // close sort menu
+    isSortOpen.value = false;
   }
 };
 
@@ -93,7 +121,7 @@ const setSortOption = (e) => {
   const opt = e.target.innerHTML;
   sortSelector.value.innerHTML = opt;
 
-  isSortOpen.value = false; // close sort menu
+  isSortOpen.value = false;
 };
 
 // eslint-disable-next-line no-unused-vars
@@ -104,9 +132,10 @@ const sortProductList = (params) => {
     .get(`/api/GET/products?sort=true&sortField=${params.field}&sortType=${params.type}`)
     .then((response) => {
       // console.log('goSearch GET response', response);
-      products.value = response.data.map((item) => {
+      const { data } = response;
+      products.value = data.map((item) => {
         const parseText = (value) => {
-          const findChannel = channels.value.find((channel) => channel.id === value);
+          const findChannel = channelOptions.value.find((channel) => channel.id === value);
           if (findChannel) return findChannel.shortname;
           return '其他';
         };
@@ -117,31 +146,28 @@ const sortProductList = (params) => {
         };
       });
     })
-    .catch((error) => {
-      console.error(error);
-    });
+    .catch((error) => showApiErrorMsg(error));
 };
 
-// channel opstions
-const getChannelList = () => {
+const getChannelOptions = () => {
   axios
     .get('/api/GET/channels')
     .then((res) => {
       // console.log(res);
-      channels.value = res.data;
+      channelOptions.value = res.data;
     })
-    .catch((error) => console.log(error));
+    .catch((error) => showApiErrorMsg(error));
 };
 
-// product list
 const getProductList = () => {
   axios
     .get('/api/GET/products')
     .then((response) => {
       // console.log('GET response', response);
-      products.value = response.data.map((item) => {
+      const { data } = response;
+      products.value = data.map((item) => {
         const parseText = (value) => {
-          const findChannel = channels.value.find((channel) => channel.id === value);
+          const findChannel = channelOptions.value.find((channel) => channel.id === value);
           if (findChannel) return findChannel.shortname;
           return '其他';
         };
@@ -152,9 +178,7 @@ const getProductList = () => {
         };
       });
     })
-    .catch((error) => {
-      console.error(error);
-    });
+    .catch((error) => showApiErrorMsg(error));
 };
 
 // new a product
@@ -199,12 +223,15 @@ const getFileInfo = () => {
   const file = fileInput.value.files[0];
   const { size } = file; // byte
   let sizeStr = null;
-  if (size <= 1024) sizeStr = `${size}Byte | `;
-  else if (size > 1024 && size <= 1048576) {
+  if (size <= 1024) {
+    sizeStr = `${size}Byte | `;
+  } else if (size > 1024 && size <= 1048576) {
     sizeStr = `${(size / 1024).toFixed(1)}KB | `;
   } else if (size > 1048576 && size <= 1073741824) {
     sizeStr = `${(size / 1024 / 1024).toFixed(1)}MB | `;
-  } else if (size > 1073741824) sizeStr = '檔案過大 | ';
+  } else if (size > 1073741824) {
+    sizeStr = '檔案過大 | ';
+  }
 
   fileInfo.value.value = sizeStr + fileInput.value.files[0].name;
   input.img = fileInput.value.files[0].name;
@@ -271,16 +298,23 @@ const saveProduct = () => {
 
   axios
     .post('/api/POST/product', params)
-    .then(() => {
-      getProductList();
+    .then((response) => {
+      const { status } = response;
       closeModal();
+
+      if (status === 201) {
+        getProductList();
+        showSuccessMsg();
+      } else {
+        showFailedMsg();
+      }
     })
-    .then(() => {})
     .catch((error) => {
-      console.error(error);
+      closeModal();
+      showApiErrorMsg(error);
     });
 };
-
+sv.
 // search
 // eslint-disable-next-line no-unused-vars
 const initSearchInput = () => {
@@ -334,9 +368,10 @@ const goSearch = () => {
     .get(`/api/GET/products?search=${params.prodName}`)
     .then((response) => {
       // console.log('goSearch GET response', response);
-      products.value = response.data.map((item) => {
+      const { data } = response;
+      products.value = data.map((item) => {
         const parseText = (value) => {
-          const findChannel = channels.value.find((channel) => channel.id === value);
+          const findChannel = channelOptions.value.find((channel) => channel.id === value);
           if (findChannel) return findChannel.shortname;
 
           return '其他';
@@ -348,16 +383,20 @@ const goSearch = () => {
         };
       });
     })
-    .catch((error) => {
-      console.error(error);
-    });
+    .catch((error) => showApiErrorMsg(error));
 };
 
 // life-cycle
 onMounted(() => {
-  getChannelList();
+  getChannelOptions();
   getProductList();
 });
+</script>
+
+<script>
+export default {
+  name: 'BuyList'
+};
 </script>
 
 <style scoped>

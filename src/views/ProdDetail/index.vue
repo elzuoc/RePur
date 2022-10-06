@@ -1,16 +1,18 @@
 <template src="./template.html" />
 
 <script setup>
-// import { ref } from 'vue';
 import { ref, onMounted } from 'vue';
 import { useRoute } from 'vue-router';
 import axios from 'axios';
+import SuccessMsg from '../../components/SuccessMsg.vue'; // eslint-disable-line no-unused-vars
+import FailedMsg from '../../components/FailedMsg.vue'; // eslint-disable-line no-unused-vars
+import ApiErrorMsg from '../../components/ApiErrorMsg.vue'; // eslint-disable-line no-unused-vars
 
 const route = useRoute();
 let mainId = 0;
 const mainInfo = ref({});
 const subProductList = ref([]);
-const channels = ref([]);
+const channelOptions = ref([]);
 const isVerify = ref(false);
 const focusDate = ref(false);
 const focusPrice = ref(false);
@@ -33,13 +35,39 @@ const originMaxMin = {
   max: {},
   min: {},
 };
+// msg
+const isSuccessMsg = ref(false);
+const isFailedMsg = ref(false);
+const isApiErrorMsg = ref(false);
+
+const showApiErrorMsg = (error) => {
+  isApiErrorMsg.value = true;
+  setTimeout(() => {
+    isApiErrorMsg.value = false;
+  }, 3000);
+
+  console.log(error);
+};
+const showSuccessMsg = () => {
+  isSuccessMsg.value = true;
+  setTimeout(() => {
+    isSuccessMsg.value = false;
+  }, 3000);
+};
+const showFailedMsg = () => {
+  isFailedMsg.value = true;
+  setTimeout(() => {
+    isFailedMsg.value = false;
+  }, 3000);
+};
 
 const parseChannel = (channelId) => {
   axios
     .get(`/api/GET/channels?parse=${channelId}`)
     .then((response) => {
       // console.log(response);
-      mainInfo.value.channelTitle = response.data.fullname;
+      const { fullname } = response.data; // 解構
+      mainInfo.value.channelTitle = fullname;
     })
     .catch((error) => console.log(error));
 };
@@ -61,17 +89,19 @@ const getSubProductList = () => {
     .get(`/api/GET/products?belongid=${mainId}`)
     .then((response) => {
       // console.log('getSubProductList', response.data);
-      subProductList.value = response.data;
+      const { data } = response; // 解構
+      subProductList.value = data;
     })
     .catch((error) => console.log(error));
 };
 
-const getChannelList = () => {
+const getChannelOptions = () => {
   axios
     .get('/api/GET/channels')
     .then((res) => {
       // console.log(res);
-      channels.value = res.data;
+      const { data } = res; // 解構
+      channelOptions.value = data;
     })
     .catch((error) => console.log(error));
 };
@@ -109,7 +139,7 @@ const verifyInput = () => {
 const initInputParams = () => {
   input.date = null;
   input.price = null;
-  input.discount = '';
+  input.discount = 0;
   input.channel = '';
 };
 
@@ -180,27 +210,33 @@ const insertSubProduct = () => {
   // console.log('params', params);
   axios
     .post('/api/POST/product', params)
-    .then(() => {
-      if (originMaxMin.max) {
-        adjustHighestSet().then(() => {
+    .then((response) => {
+      const { status } = response;
+
+      if (status === 201) {
+        if (originMaxMin.max) {
+          adjustHighestSet().then(() => {
+            getMainProductInfo();
+            getSubProductList();
+          });
+        } else if (originMaxMin.min) {
+          adjustLowestSet().then(() => {
+            getMainProductInfo();
+            getSubProductList();
+          });
+        } else {
           getMainProductInfo();
           getSubProductList();
-        });
-      } else if (originMaxMin.min) {
-        adjustLowestSet().then(() => {
-          getMainProductInfo();
-          getSubProductList();
-        });
+        }
+
+        showSuccessMsg();
       } else {
-        getMainProductInfo();
-        getSubProductList();
+        showFailedMsg();
       }
 
       initInputParams();
     })
-    .catch((error) => {
-      console.error(error);
-    });
+    .catch((error) => showApiErrorMsg(error));
 };
 
 // life cycle
@@ -210,8 +246,14 @@ onMounted(() => {
   // console.log(route.query);
   getMainProductInfo();
   getSubProductList();
-  getChannelList();
+  getChannelOptions();
 });
+</script>
+
+<script>
+export default {
+  name: 'ProdDetail',
+};
 </script>
 
 <style scoped>

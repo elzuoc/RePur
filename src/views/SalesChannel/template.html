@@ -46,7 +46,7 @@
   <div class="w-full mt-4 grid grid-cols-2 gap-2">
     <!-- one product -->
     <div
-      v-for="item in channels"
+      v-for="item in channelList"
       :key="item"
       class="flex grid grid-cols-4 gap-1 border h-16 p-2"
       :class="{
@@ -72,7 +72,10 @@
           @click="openEditModal(item)"
         >
           <div class="absolute m-auto inset-0 w-fit h-fit text-white">
-            <img src="@/assets/icons/pencil.svg" class="w-5 inline-block" />
+            <img
+              src="@/assets/images/icons/pencil.svg"
+              class="w-5 inline-block"
+            />
           </div>
         </div>
         <div
@@ -81,7 +84,10 @@
           @click="openDeleteCheckModal(item)"
         >
           <div class="absolute m-auto inset-0 w-fit h-fit text-white">
-            <img src="@/assets/icons/trash.svg" class="w-5 inline-block" />
+            <img
+              src="@/assets/images/icons/trash.svg"
+              class="w-5 inline-block"
+            />
           </div>
         </div>
       </div>
@@ -169,3 +175,7 @@
     </button>
   </div>
 </div>
+
+<SuccessMsg :isSuccessMsg="isSuccessMsg" />
+<FailedMsg :isFailedMsg="isFailedMsg" />
+<ApiErrorMsg :isApiErrorMsg="isApiErrorMsg" />
