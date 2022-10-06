@@ -61,49 +61,45 @@ const showFailedMsg = () => {
   }, 3000);
 };
 
-const parseChannel = (channelId) => {
-  axios
-    .get(`/api/GET/channels?parse=${channelId}`)
-    .then((response) => {
-      // console.log(response);
-      const { fullname } = response.data; // 解構
-      mainInfo.value.channelTitle = fullname;
-    })
-    .catch((error) => console.log(error));
+const apiParseChannel = (channelId) => axios.get(`/api/GET/channels?parse=${channelId}`);
+const parseChannel = async (channelId) => {
+  try {
+    const { data } = await apiParseChannel(channelId);
+    mainInfo.value.channelTitle = data.fullname;
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
-const getMainProductInfo = () => {
-  axios
-    .get(`/api/GET/product/${mainId}`)
-    .then((response) => {
-      // console.log(response.data);
-      const { data } = response; // 解構
-      mainInfo.value = data;
-      parseChannel(data.sales_channel);
-    })
-    .catch((error) => console.log(error));
+const apiGetMainProductInfo = () => axios.get(`/api/GET/product/${mainId}`);
+const getMainProductInfo = async () => {
+  try {
+    const { data } = await apiGetMainProductInfo();
+    mainInfo.value = data;
+    parseChannel(data.sales_channel);
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
-const getSubProductList = () => {
-  axios
-    .get(`/api/GET/products?belongid=${mainId}`)
-    .then((response) => {
-      // console.log('getSubProductList', response.data);
-      const { data } = response; // 解構
-      subProductList.value = data;
-    })
-    .catch((error) => console.log(error));
+const apiGetSubProductList = () => axios.get(`/api/GET/products?belongid=${mainId}`);
+const getSubProductList = async () => {
+  try {
+    const { data } = await apiGetSubProductList();
+    subProductList.value = data;
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
-const getChannelOptions = () => {
-  axios
-    .get('/api/GET/channels')
-    .then((res) => {
-      // console.log(res);
-      const { data } = res; // 解構
-      channelOptions.value = data;
-    })
-    .catch((error) => console.log(error));
+const apiGetChannelOptions = () => axios.get('/api/GET/channels');
+const getChannelOptions = async () => {
+  try {
+    const { data } = await apiGetChannelOptions();
+    channelOptions.value = data;
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
 const restoreInput = () => {

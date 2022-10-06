@@ -68,15 +68,11 @@ const showFailedMsg = () => {
   }, 3000);
 };
 
-const getChannelList = async () => {
-  axios
+const getChannelList = () => {
+  return axios
     .get('/api/GET/channels')
-    .then((res) => {
-      // console.log(res);
-      const { data } = res;
-      channelList.value = data;
-    })
-    .catch((error) => showApiErrorMsg(error));
+    .then((res) => res.data)
+    .catch((error) => console.error(error));
 };
 
 const restoreInput = (behavior) => {
@@ -112,8 +108,9 @@ const initCreateParams = () => {
   input.addShortName = '';
 };
 
+const apiCreateChannel = (params) => axios.post(`/api/POST/channels`, params);
 // eslint-disable-next-line no-unused-vars
-const createChannel = () => {
+const createChannel = async () => {
   if (!verifyAddInput()) return;
 
   const params = {
@@ -121,21 +118,20 @@ const createChannel = () => {
     shortname: input.addShortName,
   };
 
-  axios
-    .post(`/api/POST/channels`, params)
-    .then((response) => {
-      const { status } = response;
+  try {
+    const { status } = await apiCreateChannel(params);
 
-      if (status === 201) {
-        getChannelList();
-        showSuccessMsg();
-      } else {
-        showFailedMsg();
-      }
+    if (status === 201) {
+      channelList.value = await getChannelList();
+      showSuccessMsg();
+    } else {
+      showFailedMsg();
+    }
 
-      initCreateParams();
-    })
-    .catch((error) => showApiErrorMsg(error));
+    initCreateParams();
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
 // edit form
@@ -177,8 +173,9 @@ const closeEditModal = () => {
   input.editShortName = null;
 };
 
+const apiEditChannel = (params) => axios.patch(`/api/PATCH/channels/${input.editId}`, params);
 // eslint-disable-next-line no-unused-vars
-const editChannel = () => {
+const editChannel = async () => {
   if (!verifyInput()) return;
 
   const params = {
@@ -186,23 +183,20 @@ const editChannel = () => {
     shortname: input.editShortName,
   };
 
-  axios
-    .patch(`/api/PATCH/channels/${input.editId}`, params)
-    .then((response) => {
-      const { status } = response;
-      closeEditModal();
+  try {
+    const { status } = await apiEditChannel(params);
 
-      if (status === 200) {
-        getChannelList();
-        showSuccessMsg();
-      } else {
-        showFailedMsg();
-      }
-    })
-    .catch((error) => {
-      closeEditModal();
-      showApiErrorMsg(error);
-    });
+    closeEditModal();
+    if (status === 200) {
+      channelList.value = await getChannelList();
+      showSuccessMsg();
+    } else {
+      showFailedMsg();
+    }
+  } catch (error) {
+    closeEditModal();
+    showApiErrorMsg(error);
+  }
 };
 
 // delete form
@@ -227,31 +221,29 @@ const closeModal = () => {
   isModalOpen.value = false;
   isModalClose.value = true;
 };
-// eslint-disable-next-line no-unused-vars
-const delChannel = () => {
-  axios
-    .delete(`/api/DELETE/channels/${input.delId}`)
-    .then((response) => {
-      // console.log(response);
-      const { status } = response;
-      closeModal();
 
-      if (status === 201) {
-        getChannelList();
-        showSuccessMsg();
-      } else {
-        showFailedMsg();
-      }
-    })
-    .catch((error) => {
-      closeModal();
-      showApiErrorMsg(error);
-    });
+const apiDelChannel = () => axios.delete(`/api/DELETE/channels/${input.delId}`);
+// eslint-disable-next-line no-unused-vars
+const delChannel = async () => {
+  try {
+    const { status } = await apiDelChannel();
+
+    closeModal();
+    if (status === 204) {
+      channelList.value = await getChannelList();
+      showSuccessMsg();
+    } else {
+      showFailedMsg();
+    }
+  } catch (error) {
+    closeModal();
+    showApiErrorMsg(error);
+  }
 };
 
 // life-cycle
-onMounted(() => {
-  getChannelList();
+onMounted(async () => {
+  channelList.value = await getChannelList();
 });
 </script>
 

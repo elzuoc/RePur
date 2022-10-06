@@ -21,15 +21,14 @@ const showApiErrorMsg = (error) => {
   console.log(error);
 };
 
-const getChannelOptions = () => {
-  axios
-    .get('/api/GET/channels')
-    .then((res) => {
-      // console.log(res);
-      const { data } = res;
-      channelOptions.value = data;
-    })
-    .catch((error) => showApiErrorMsg(error));
+const apiGetChannelOptions = () => axios.get('/api/GET/channels');
+const getChannelOptions = async () => {
+  try {
+    const { data } = await apiGetChannelOptions();
+    channelOptions.value = data;
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
 const exportExcel = async (dataList) => {
@@ -105,35 +104,32 @@ const exportExcel = async (dataList) => {
   }
 };
 
+const apiGetProductList = () => axios.get('/api/GET/products');
 // eslint-disable-next-line no-unused-vars
-const getProductList = () => {
-  axios
-    .get('/api/GET/products')
-    .then((response) => {
-      // console.log('GET response', response);
+const getProductList = async () => {
+  try {
+    const { data } = await apiGetProductList();
+    const dataList = [];
+    data.map((item) => {
+      const obj = { id: item.id, name: item.name, img: item.pic };
+      dataList.push(obj);
 
-      const dataList = [];
-      const { data } = response;
-      data.map((item) => {
-        const obj = { id: item.id, name: item.name, img: item.pic };
-        dataList.push(obj);
+      const parseText = (value) => {
+        if (value === '1') return '全聯';
+        if (value === '2') return '家樂福';
+        return '其他';
+      };
 
-        const parseText = (value) => {
-          if (value === '1') return '全聯';
-          if (value === '2') return '家樂福';
-          return '其他';
-        };
+      return {
+        ...item,
+        sales_channel_text: parseText(item.sales_channel),
+      };
+    });
 
-        return {
-          ...item,
-          sales_channel_text: parseText(item.sales_channel),
-        };
-      });
-
-      return dataList;
-    })
-    .then((dataList) => exportExcel(dataList))
-    .catch((error) => showApiErrorMsg(error));
+    exportExcel(dataList);
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
 // life-cycle

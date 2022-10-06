@@ -124,61 +124,61 @@ const setSortOption = (e) => {
   isSortOpen.value = false;
 };
 
+const apiSortProductList = (params) =>
+  axios.get(`/api/GET/products?sort=true&sortField=${params.field}&sortType=${params.type}`);
 // eslint-disable-next-line no-unused-vars
-const sortProductList = (params) => {
+const sortProductList = async (params) => {
   setSortOption(params.event);
 
-  axios
-    .get(`/api/GET/products?sort=true&sortField=${params.field}&sortType=${params.type}`)
-    .then((response) => {
-      // console.log('goSearch GET response', response);
-      const { data } = response;
-      products.value = data.map((item) => {
-        const parseText = (value) => {
-          const findChannel = channelOptions.value.find((channel) => channel.id === value);
-          if (findChannel) return findChannel.shortname;
-          return '其他';
-        };
+  try {
+    const { data } = await apiSortProductList;
+    products.value = data.map((item) => {
+      const parseText = (value) => {
+        const findChannel = channelOptions.value.find((channel) => channel.id === value);
+        if (findChannel) return findChannel.shortname;
+        return '其他';
+      };
 
-        return {
-          ...item,
-          sales_channel_text: parseText(item.sales_channel),
-        };
-      });
-    })
-    .catch((error) => showApiErrorMsg(error));
+      return {
+        ...item,
+        sales_channel_text: parseText(item.sales_channel),
+      };
+    });
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
-const getChannelOptions = () => {
-  axios
-    .get('/api/GET/channels')
-    .then((res) => {
-      // console.log(res);
-      channelOptions.value = res.data;
-    })
-    .catch((error) => showApiErrorMsg(error));
+const apiGetChannelOptions = () => axios.get('/api/GET/channels');
+const getChannelOptions = async () => {
+  try {
+    const { data } = await apiGetChannelOptions();
+    channelOptions.value = data;
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
-const getProductList = () => {
-  axios
-    .get('/api/GET/products')
-    .then((response) => {
-      // console.log('GET response', response);
-      const { data } = response;
-      products.value = data.map((item) => {
-        const parseText = (value) => {
-          const findChannel = channelOptions.value.find((channel) => channel.id === value);
-          if (findChannel) return findChannel.shortname;
-          return '其他';
-        };
+const apiGetProductList = () => axios.get('/api/GET/products');
+const getProductList = async () => {
+  try {
+    const { data } = await apiGetProductList();
 
-        return {
-          ...item,
-          sales_channel_text: parseText(item.sales_channel),
-        };
-      });
-    })
-    .catch((error) => showApiErrorMsg(error));
+    products.value = data.map((item) => {
+      const parseText = (value) => {
+        const findChannel = channelOptions.value.find((channel) => channel.id === value);
+        if (findChannel) return findChannel.shortname;
+        return '其他';
+      };
+
+      return {
+        ...item,
+        sales_channel_text: parseText(item.sales_channel),
+      };
+    });
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
 // new a product
@@ -279,8 +279,9 @@ const verifyInput = () => {
   return true;
 };
 
+const apiSaveProduct = (params) => axios.post('/api/POST/product', params);
 // eslint-disable-next-line no-unused-vars
-const saveProduct = () => {
+const saveProduct = async () => {
   if (!verifyInput()) return;
 
   const params = {
@@ -296,23 +297,20 @@ const saveProduct = () => {
     buy_date: input.date,
   };
 
-  axios
-    .post('/api/POST/product', params)
-    .then((response) => {
-      const { status } = response;
-      closeModal();
+  try {
+    const { status } = await apiSaveProduct(params);
 
-      if (status === 201) {
-        getProductList();
-        showSuccessMsg();
-      } else {
-        showFailedMsg();
-      }
-    })
-    .catch((error) => {
-      closeModal();
-      showApiErrorMsg(error);
-    });
+    closeModal();
+    if (status === 201) {
+      getProductList();
+      showSuccessMsg();
+    } else {
+      showFailedMsg();
+    }
+  } catch (error) {
+    closeModal();
+    showApiErrorMsg(error);
+  }
 };
 
 // search
@@ -357,33 +355,32 @@ const changeSearch = (item) => {
   searchSuggest.value.classList.add('hidden');
 };
 
+const apiGoSearch = (params) => axios.get(`/api/GET/products?search=${params.prodName}`);
 // eslint-disable-next-line no-unused-vars
-const goSearch = () => {
+const goSearch = async () => {
   const params = {
     prodName:
       search.value.textContent.trim() === 'Search...' ? null : search.value.textContent.trim(),
   };
 
-  axios
-    .get(`/api/GET/products?search=${params.prodName}`)
-    .then((response) => {
-      // console.log('goSearch GET response', response);
-      const { data } = response;
-      products.value = data.map((item) => {
-        const parseText = (value) => {
-          const findChannel = channelOptions.value.find((channel) => channel.id === value);
-          if (findChannel) return findChannel.shortname;
+  try {
+    const { data } = await apiGoSearch(params);
+    products.value = data.map((item) => {
+      const parseText = (value) => {
+        const findChannel = channelOptions.value.find((channel) => channel.id === value);
+        if (findChannel) return findChannel.shortname;
 
-          return '其他';
-        };
+        return '其他';
+      };
 
-        return {
-          ...item,
-          sales_channel_text: parseText(item.sales_channel),
-        };
-      });
-    })
-    .catch((error) => showApiErrorMsg(error));
+      return {
+        ...item,
+        sales_channel_text: parseText(item.sales_channel),
+      };
+    });
+  } catch (error) {
+    showApiErrorMsg(error);
+  }
 };
 
 // life-cycle
