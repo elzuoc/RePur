@@ -7,6 +7,7 @@ module.exports = {
   plugins: ['prettier'],
   parserOptions: {},
   rules: {
+    'max-len': 'off',
     'prettier/prettier': 'error',
     'import/no-extraneous-dependencies': ['error', { devDependencies: true }],
     'no-console': process.env.NODE_ENV === 'production' ? 'error' : 'off',

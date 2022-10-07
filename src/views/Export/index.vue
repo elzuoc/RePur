@@ -1,11 +1,31 @@
-<template src="./template.html" />
+<template>
+  <div class="container mx-auto px-4">
+    <div
+      class="w-full border-2 border-dashed border-slate-300 text-slate-300 rounded bg-white p-2 mt-2"
+    >
+      <div
+        class="relative w-full h-20 border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
+        @click="getProductList"
+      >
+        <div class="absolute m-auto inset-0 w-fit h-fit">
+          <span class="text-white font-bold tracking-wider">+ 匯出商品紀錄</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <canvas ref="photoCanvas" width="50" height="50" class="hidden"></canvas>
+
+  <SuccessMsg :is-success-msg="isSuccessMsg" />
+  <FailedMsg :is-failed-msg="isFailedMsg" />
+  <ApiErrorMsg :is-api-error-msg="isApiErrorMsg" />
+</template>
 
 <script setup>
 import axios from 'axios';
 import { ref, onMounted } from 'vue';
 import ExcelJS from 'exceljs';
 import { saveAs } from 'file-saver';
-import ApiErrorMsg from '../../components/ApiErrorMsg.vue'; // eslint-disable-line no-unused-vars
+import ApiErrorMsg from '../../components/ApiErrorMsg.vue';
 
 const channelOptions = ref([]);
 
@@ -105,7 +125,6 @@ const exportExcel = async (dataList) => {
 };
 
 const apiGetProductList = () => axios.get('/api/GET/products');
-// eslint-disable-next-line no-unused-vars
 const getProductList = async () => {
   try {
     const { data } = await apiGetProductList();

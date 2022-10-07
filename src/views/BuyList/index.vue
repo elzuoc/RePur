@@ -1,19 +1,313 @@
-<template src="./template.html" />
+<template>
+  <div class="container mx-auto px-4">
+    <div class="w-full relative">
+      <div class="w-full border border-solid border-slate-300 text-slate-300 rounded bg-white z-2">
+        <input
+          type="hidden"
+          class="w-[calc(100%-24px)] inline-block focus:outline-none focus:border focus-visible:border-solid focus:border-slate-400 rounded p-1"
+          placeholder="Search..."
+        />
+
+        <div
+          ref="search"
+          class="w-[calc(100%-24px)] inline-block focus:outline-none focus:border focus-visible:border-solid focus:border-slate-400 rounded p-1 text-left"
+          contenteditable="true"
+          @click="clearSearchInput"
+          @blur="initSearchInput"
+          @input="filterSearchOptions($event)"
+        >
+          Search...
+        </div>
+        <img
+          src="@/assets/images/icons/search.svg"
+          class="w-6 inline-block cursor-pointer"
+          @click="goSearch"
+        />
+      </div>
+
+      <div
+        id="searchSuggest"
+        ref="searchSuggest"
+        class="absolute top-9 w-full text-left bg-white p-1 z-20 border border-slate-50 bg-white p-1 text-left shadow-md hidden"
+      >
+        <div v-for="item in searchOptions" :key="item" class="cursor-pointer">
+          <!-- eslint-disable vue/no-v-html -->
+          <div @click="changeSearch(item)" v-html="item.name"></div>
+          <!-- eslint-enable -->
+        </div>
+      </div>
+    </div>
+
+    <div
+      class="w-full border-2 border-dashed border-slate-300 text-slate-300 rounded bg-white p-2 mt-2"
+    >
+      <div
+        class="relative w-full h-20 border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
+        @click="openNewItemModal"
+      >
+        <div class="absolute m-auto inset-0 w-fit h-fit">
+          <span class="text-white font-bold tracking-wider">+ 常購商品</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="relative w-full mt-4 text-left">
+      <div
+        ref="sortSelector"
+        class="w-fit h-10 p-2 border border-zinc-300 text-zinc-500 cursor-pointer"
+        @click="openSortOption"
+      >
+        <img src="@/assets/images/icons/sort-desc.svg" class="w-5 inline-block" />
+        日期 新→舊
+      </div>
+      <div
+        ref="sortOption"
+        class="absolute w-fit h-fit z-20 bg-white/[.95] shadow-md shadow-zinc-300"
+        :class="{ block: isSortOpen, hidden: !isSortOpen }"
+      >
+        <div
+          class="p-2 hover:bg-zinc-50 cursor-pointer"
+          @click="sortProductList({ event: $event, field: 'buy_date', type: 'desc' })"
+        >
+          <img src="@/assets/images/icons/sort-desc.svg" class="w-5 inline-block" />
+          日期 新→舊
+          <div class="hidden">buy_date-desc</div>
+        </div>
+        <div
+          class="p-2 hover:bg-zinc-50 cursor-pointer"
+          @click="sortProductList({ event: $event, field: 'buy_date', type: 'asc' })"
+        >
+          <img src="@/assets/images/icons/sort-asc.svg" class="w-5 inline-block" />
+          日期 舊→新
+          <div class="hidden">buy_date-asc</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="w-full mt-4 grid grid-cols-2 gap-2">
+      <router-link
+        v-for="item in products"
+        :key="item"
+        :to="{
+          path: '/ProdDetail',
+          name: 'ProdDetail',
+          query: { id: item.id },
+        }"
+      >
+        <div class="flex grid grid-cols-3 gap-1 border">
+          <div class="flex">
+            <div
+              class="aspect-square bg-zinc-200 w-full"
+              :style="{
+                'background-image': 'url(' + item.pic + ')',
+                'background-size': 'cover',
+              }"
+            ></div>
+          </div>
+          <div class="flex col-span-2">
+            <div class="flex grid gap-1 text-left">
+              <div class="flex h-5 overflow-hidden">
+                <span class="font-bold truncate"> {{ item.name }} </span>
+              </div>
+              <div class="flex">
+                <span class="text-xs">
+                  {{ item.sales_channel_text }}/{{ item.brand }}/{{ item.weight }}{{ item.unit }}
+                </span>
+              </div>
+              <div class="flex">
+                <span class="text-[0.75rem]">NT$</span>{{ item.price }}
+                <div
+                  v-if="item.discount === '1'"
+                  class="w-fit h-fit inline-block text-[0.75rem] px-1 bg-amber-500 text-white rounded ml-2"
+                >
+                  特惠活動
+                </div>
+              </div>
+              <div class="flex w-full">
+                <span class="text-[0.75rem]">{{ item.buy_date }}</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </router-link>
+    </div>
+  </div>
+
+  <div
+    ref="screenMask"
+    class="fixed w-screen h-screen z-10 top-0 left-0 bg-white/[0] backdrop-blur-[1px]"
+    :class="{ block: isSortOpen, hidden: !isSortOpen }"
+    @click="openSortOption"
+  ></div>
+
+  <div ref="modalMask" class="fixed top-0 left-0 z-10 w-screen h-screen bg-black/[.5] hidden"></div>
+  <div
+    ref="modal"
+    class="fixed m-auto left-0 right-0 top-0 bottom-0 z-20 w-11/12 md:w-8/12 lg:w-5/12 h-fit bg-white rounded border border-zinc-200 hidden transition-all duration-300 ease-in"
+    :class="{ 'opacity-0': isModalClose, 'opacity-100': isModalOpen }"
+  >
+    <div class="w-full border-b p-2 font-bold text-left">新增常購商品</div>
+    <div class="w-full min-h-[50px] p-2">
+      <div class="grid grid-cols-3 gap-2">
+        <div class="flex">
+          <div class="aspect-square w-full">
+            <div
+              class="w-full h-full border-2 border-dashed border-slate-300 text-slate-300 rounded bg-white p-2"
+            >
+              <div
+                class="relative w-full h-full border border-solid border-slate-300 text-slate-300 rounded bg-zinc-400"
+                @click="openFile"
+              >
+                <input
+                  ref="fileInput"
+                  type="file"
+                  class="hidden"
+                  accept="image/*"
+                  @change="getFileInfo"
+                />
+                <input
+                  ref="fileInfo"
+                  type="text"
+                  class="hidden"
+                  placeholder="未選取圖片"
+                  @click="openFile"
+                />
+                <input ref="fileName" v-model="input.img" type="text" class="hidden" />
+
+                <div ref="tempImg" class="absolute m-auto inset-0 w-fit h-fit">
+                  <span v-if="!dataBase64URL" class="text-white font-bold text-5xl">+</span>
+                  <img v-if="dataBase64URL" :src="dataBase64URL" class="w-full" />
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="flex col-span-2">
+          <div class="grid grid-rows-3 gap-2">
+            <div class="flex">
+              <input
+                v-model="input.name"
+                type="text"
+                :class="{
+                  'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                  'border-red-400 focus:border-red-400': isVerify && focus.name,
+                }"
+                placeholder="品名"
+                @input="verifyInput"
+              />
+            </div>
+            <div class="flex">
+              <input
+                v-model="input.brand"
+                type="text"
+                :class="{
+                  'h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                  'border-red-400 focus:border-red-400': isVerify && focus.brand,
+                }"
+                placeholder="品牌"
+                @input="verifyInput"
+              />
+            </div>
+            <div class="flex">
+              <input
+                v-model="input.capacity"
+                type="text"
+                class="h-10 w-1/2 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+                placeholder="容量/重量"
+              />
+              <select
+                v-model="input.unit"
+                class="h-10 w-1/2 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+              >
+                <option value="" selected disabled>單位</option>
+                <option v-for="(item, index) in unitOptions" :key="index" :value="item.value">
+                  {{ item.text }}
+                </option>
+              </select>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div class="flex mt-2 w-full">
+        <div class="grid grid-rows-2 gap-2 w-full">
+          <div class="flex">
+            <select
+              v-model="input.store"
+              class="h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+            >
+              <option value="" selected disabled>購買處</option>
+              <option v-for="item in channelOptions" :key="item" :value="item.id">
+                {{ item.shortname }}
+              </option>
+            </select>
+            <input
+              v-model="input.price"
+              type="number"
+              step="0.1"
+              :class="{
+                'h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1': true,
+                'border-red-400 focus:border-red-400': isVerify && focus.price,
+              }"
+              placeholder="單件金額"
+              @input="verifyInput"
+            />
+            <select
+              v-model="input.discount"
+              aria-label="discount"
+              class="h-10 w-1/3 border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+            >
+              <option value="0" selected disabled>優惠？</option>
+              <option value="1">活動優惠價</option>
+              <option value="2">日常價</option>
+            </select>
+          </div>
+          <div class="flex">
+            <input
+              v-model="input.date"
+              aria-label="date"
+              type="date"
+              class="h-10 w-full border border-zinc-300 rounded focus:outline-none focus:border-2 focus:border-zinc-300 px-2 py-1"
+            />
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="w-full border-t p-2">
+      <button
+        class="rounded py-1 px-2 mb-2 text-white bg-zinc-500 hover:bg-zinc-600 w-fit inline-block float-left"
+        @click="closeModal"
+      >
+        Cancel
+      </button>
+      <button
+        class="rounded py-1 px-2 mb-2 text-white bg-sky-500 hover:bg-sky-600 w-fit inline-block ml-2 float-right"
+        @click="saveProduct"
+      >
+        OK
+      </button>
+    </div>
+
+    <canvas ref="photoCanvas" width="500" height="500" class="hidden"></canvas>
+  </div>
+
+  <SuccessMsg :is-success-msg="isSuccessMsg" />
+  <FailedMsg :is-failed-msg="isFailedMsg" />
+  <ApiErrorMsg :is-api-error-msg="isApiErrorMsg" />
+</template>
 
 <script setup>
 import { ref, onMounted } from 'vue';
 import axios from 'axios';
-import SuccessMsg from '../../components/SuccessMsg.vue'; // eslint-disable-line no-unused-vars
-import FailedMsg from '../../components/FailedMsg.vue'; // eslint-disable-line no-unused-vars
-import ApiErrorMsg from '../../components/ApiErrorMsg.vue'; // eslint-disable-line no-unused-vars
+import SuccessMsg from '../../components/SuccessMsg.vue';
+import FailedMsg from '../../components/FailedMsg.vue';
+import ApiErrorMsg from '../../components/ApiErrorMsg.vue';
 
 // sort options
 const isSortOpen = ref(false);
 const sortSelector = ref(null);
-const sortOption = ref(null); // eslint-disable-line no-unused-vars
+const sortOption = ref(null);
 
 // unit options
-// eslint-disable-next-line no-unused-vars
 const unitOptions = ref([
   { text: '其他單位', value: '單位' },
   { text: 'g/克', value: 'g' },
@@ -56,7 +350,7 @@ const isModalOpen = ref(false);
 const isModalClose = ref(true);
 const fileInput = ref('');
 const fileInfo = ref('');
-const tempImg = ref(null); // eslint-disable-line no-unused-vars
+const tempImg = ref(null);
 const dataBase64URL = ref('');
 const isVerify = ref(false);
 const focus = ref({
@@ -108,7 +402,6 @@ const showFailedMsg = () => {
 };
 
 // sort options
-// eslint-disable-next-line no-unused-vars
 const openSortOption = () => {
   if (!isSortOpen.value) {
     isSortOpen.value = true;
@@ -126,7 +419,6 @@ const setSortOption = (e) => {
 
 const apiSortProductList = (params) =>
   axios.get(`/api/GET/products?sort=true&sortField=${params.field}&sortType=${params.type}`);
-// eslint-disable-next-line no-unused-vars
 const sortProductList = async (params) => {
   setSortOption(params.event);
 
@@ -182,7 +474,6 @@ const getProductList = async () => {
 };
 
 // new a product
-// eslint-disable-next-line no-unused-vars
 const openNewItemModal = () => {
   modal.value.style.display = 'block';
   modalMask.value.style.display = 'block';
@@ -214,11 +505,9 @@ const getImage = async (src) => {
   return img;
 };
 
-// eslint-disable-next-line no-unused-vars
 const openFile = () => {
   fileInput.value.click();
 };
-// eslint-disable-next-line no-unused-vars
 const getFileInfo = () => {
   const file = fileInput.value.files[0];
   const { size } = file; // byte
@@ -280,7 +569,6 @@ const verifyInput = () => {
 };
 
 const apiSaveProduct = (params) => axios.post('/api/POST/product', params);
-// eslint-disable-next-line no-unused-vars
 const saveProduct = async () => {
   if (!verifyInput()) return;
 
@@ -314,18 +602,15 @@ const saveProduct = async () => {
 };
 
 // search
-// eslint-disable-next-line no-unused-vars
 const initSearchInput = () => {
   if (search.value.textContent.trim() === '') {
     search.value.textContent = 'Search...';
     search.value.classList.remove('text-slate-800');
   }
 };
-// eslint-disable-next-line no-unused-vars
 const clearSearchInput = () => {
   if (search.value.textContent.trim() === 'Search...') search.value.textContent = '';
 };
-// eslint-disable-next-line no-unused-vars
 const filterSearchOptions = (e) => {
   searchOptions.value = Array.from(products.value).filter((item) =>
     item.name.includes(e.target.innerHTML)
@@ -348,7 +633,6 @@ const filterSearchOptions = (e) => {
   if (search.value.textContent.trim() === '') searchSuggest.value.classList.add('hidden');
 };
 
-// eslint-disable-next-line no-unused-vars
 const changeSearch = (item) => {
   search.value.textContent = item.name.replace(/(<([^>]+)>)/gi, '');
   search.value.classList.add('text-slate-800');
@@ -356,7 +640,6 @@ const changeSearch = (item) => {
 };
 
 const apiGoSearch = (params) => axios.get(`/api/GET/products?search=${params.prodName}`);
-// eslint-disable-next-line no-unused-vars
 const goSearch = async () => {
   const params = {
     prodName:
